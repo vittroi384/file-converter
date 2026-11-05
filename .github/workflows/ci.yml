@@ -59,6 +59,7 @@ jobs:
             echo "ADMIN_PASSWORD_HASH='$(node tools/hash-password.ts "$PW")'"
             echo "SESSION_SECRET=$(openssl rand -hex 32)"
             echo "SECURE_COOKIE=false"
+            echo "GRAFANA_ADMIN_PASSWORD=$(openssl rand -hex 18)" # 그라파나는 안 켜지만 compose가 값을 요구한다
           } > "$RUNNER_TEMP/fc.env"
           echo "ADMIN_PW=$PW" >> "$GITHUB_ENV" # monitoring.mjs가 관리자로 로그인
       - run: docker compose -f infra/docker-compose.yml --env-file "$RUNNER_TEMP/fc.env" up -d --build --wait

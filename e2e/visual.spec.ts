@@ -5,6 +5,7 @@ import { test, expect } from '@playwright/test';
 import { stubTelemetry } from './helpers.ts';
 
 test.skip(({ browserName }) => browserName !== 'chromium', '기준 스크린샷은 Edge 하나로(엔진마다 글꼴 렌더가 달라 기준이 갈린다)');
+test.skip(process.platform !== 'win32', '기준 스크린샷은 윈도우에서 찍은 것뿐(리눅스 CI는 글꼴 렌더가 달라 건너뜀)');
 test.use({ serviceWorkers: 'block' });
 test.beforeEach(async ({ page }) => { await stubTelemetry(page); await page.emulateMedia({ reducedMotion: 'reduce' }); });
 
