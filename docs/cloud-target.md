@@ -4,7 +4,7 @@
 
 그림: [08 목표 구성 · OCI](diagrams/08-target-oci.png) · [09 목표 구성 · AWS](diagrams/09-target-aws.png) (원본 `tools/arch/08-target-oci.html`·`09-target-aws.html`, `node tools/arch/render.mjs 08 09`). 그림에서 점선 테두리 + '새로' 표시가 새로 붙일 것, 실선은 지금 있는 것이다.
 
-기본 방침: 지금의 Docker Compose 묶음(web·ssr·api·VictoriaMetrics·VictoriaLogs·vmalert·Alertmanager·Grafana)은 VM 한 대에 그대로 올리고, 바깥(CDN 캐시·백업 보관·비밀값·이미지 저장소·배포 방식)만 바꾼다. 원본은 nginx 하나로 둔다. 언어 이동(`/`), 구운 페이지가 없을 때 SSR로 넘기기, 보안 머리글을 nginx가 이미 하고 있어서, 이것을 CDN 쪽 규칙으로 옮기는 건 확장 단계로 미룬다.
+기본 방침: 지금의 Docker Compose 묶음(web·ssr·api·VictoriaMetrics·VictoriaLogs·vmalert·Alertmanager·Grafana)은 VM 한 대에 그대로 올리고, 바깥(CDN 캐시·백업 보관·비밀값·이미지 저장소·배포 방식)만 바꾼다. 원본은 nginx 하나로 둔다. 언어 이동(`/`), SSG 페이지가 없을 때 SSR로 넘기기, 보안 머리글을 nginx가 이미 하고 있어서, 이것을 CDN 쪽 규칙으로 옮기는 건 확장 단계로 미룬다.
 
 ## 역할 대응표
 
@@ -34,7 +34,7 @@
 - **브라우저 안 변환.** 파일은 서버로 가지 않는다. 서버가 받는 건 페이지 요청과 익명 숫자(통계)뿐이다. 클라우드를 바꿔도 이 경계는 그대로다.
 - **CSP `connect-src 'self'`** 를 비롯한 보안 머리글(COOP·COEP·CSP 등). nginx가 붙이고 CDN은 그대로 전달한다. 배포 점검(deploy.sh)과 합성 감시가 계속 확인한다.
 - **compose 묶음과 볼륨.** alerting · vm-data · vlogs-data · am-data · ssr-cache · grafana-data. 공개 포트는 web:8080 하나.
-- **구운 HTML 280쪽 + 스트리밍 SSR**, nginx의 SSR 캐시.
+- **SSG 280페이지 + 스트리밍 SSR**(하이브리드 렌더링), nginx의 SSR 캐시.
 - **deploy.sh의 점검·되돌림** (첫 화면 · CSP · SSR 주소 · /api/health, 실패하면 이전 이미지). 바뀌는 건 "빌드" 대신 "레지스트리에서 받기"뿐.
 - **CI 시험** (단위 · E2E 4엔진 · 운영 경로). 배포 단계는 이 뒤에 붙인다.
 
@@ -79,7 +79,7 @@
 ## 주의할 점
 
 - **HTML 캐시와 언어 이동.** nginx는 `/`에 `Vary: Accept-Language, Cookie`를 붙이고 언어에 따라 다른 응답을 준다. CDN이 `/`를 캐시하면 다른 언어 사용자에게 엉뚱한 첫 화면이 갈 수 있다. `/`·`/api/*`·`/admin`은 캐시하지 않는다.
-- **구운 HTML은 지금 `Cache-Control: no-cache`.** 가장자리에서 캐시하려면 CDN 쪽에서 캐시 시간을 따로 정하고, 배포마다 캐시를 비워야(무효화) 옛 페이지가 남지 않는다. `/assets/*`는 해시 파일이라 지금도 1년 캐시라 문제없다.
+- **SSG HTML은 지금 `Cache-Control: no-cache`.** 가장자리에서 캐시하려면 CDN 쪽에서 캐시 시간을 따로 정하고, 배포마다 캐시를 비워야(무효화) 옛 페이지가 남지 않는다. `/assets/*`는 해시 파일이라 지금도 1년 캐시라 문제없다.
 - **크롤러 집계가 줄어든다.** 봇 요청은 nginx의 mirror로 세는데, CDN이 HTML을 내주면 그 요청은 nginx에 오지 않는다. HTML을 캐시하면 크롤러 숫자가 실제보다 적게 잡힌다.
 - **진짜 클라이언트 IP.** api는 `TRUST_PROXY=true`로 X-Forwarded-For를 믿는다. CDN → (LB) → nginx로 단계가 늘면 몇 단계를 믿을지 다시 확인해야 한다.
 - **arm64.** Ampere A1(그리고 Graviton)은 arm64다. 지금 deploy.sh는 서버에서 빌드하니 문제가 없었지만, CI에서 빌드하면 대상 아키텍처를 지정해야 한다.

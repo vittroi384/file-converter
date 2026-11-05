@@ -14,7 +14,7 @@
 
 사진·PDF·엑셀·영상을 **서버로 보내지 않고 브라우저 탭 안(Web Worker + WebAssembly)에서** 변환하는 공개 웹서비스입니다. 광고·회원가입이 없습니다.
 서버는 페이지를 내주고 익명 숫자(형식·크기·처리 시간)만 받으며, CSP `connect-src 'self'`로 파일 바이트가 다른 서버로 나갈 경로 자체를 막았습니다. 운영자는 이 숫자로 대시보드와 알림(VictoriaMetrics·vmalert·Alertmanager)을 봅니다.
-영어가 기본(`/`)이고 한국어·스페인어·포르투갈어·독일어·프랑스어·일본어·힌디어·인도네시아어·중국어(간체)는 `/ko` `/es` … 아래에 **10개 언어**로 제공합니다. 주요 페이지 280쪽은 미리 구운 HTML(SSG), 목록에 없는 변환 조합은 스트리밍 SSR + nginx 캐시로 내줍니다.
+영어가 기본(`/`)이고 한국어·스페인어·포르투갈어·독일어·프랑스어·일본어·힌디어·인도네시아어·중국어(간체)는 `/ko` `/es` … 아래에 **10개 언어**로 제공합니다. 렌더링은 **하이브리드 렌더링**입니다. 주요 280페이지는 빌드 시점에 React 19 `prerenderToNodeStream`으로 완성된 HTML을 만들어 두는 **정적 사이트 생성(SSG)**, 목록에 없는 변환 조합은 요청이 올 때 Node 서버가 `renderToPipeableStream`으로 그려 보내는 **스트리밍 SSR** + nginx 캐시로 내줍니다. 검색엔진·AI 크롤러는 자바스크립트를 실행하지 않고도 완성된 본문을 읽고, 사용자는 첫 화면을 바로 받습니다.
 
 ## 스크린샷
 
@@ -30,7 +30,7 @@
     <td width="50%"><img src="assets/privacy.png"><br><sub><b>파일은 어디로 가나</b> — 변환은 브라우저 안, 서버로 가는 파일 바이트 0</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="assets/landing.png"><br><sub><b>변환별 안내 페이지</b> — 미리 구운 HTML, 10개 언어 (<code>/ko/heic-to-jpg</code>)</sub></td>
+    <td width="50%"><img src="assets/landing.png"><br><sub><b>변환별 안내 페이지</b> — 정적 사이트 생성(SSG), 10개 언어 (<code>/ko/heic-to-jpg</code>)</sub></td>
     <td width="50%" align="center"><img src="assets/mobile.png" width="180"><br><sub><b>모바일(어두운 화면)</b> — 390px</sub></td>
   </tr>
 </table>
@@ -59,7 +59,7 @@
 | 그림 | 내용 |
 |---|---|
 | [변환 흐름](docs/diagrams/03-convert-flow.png) | 파일 놓기 → 옵션 검사 → 비용·한도 → 풀 입장 → 워커 → 결과 → 통계 |
-| [요청 경로](docs/diagrams/04-request-routing.png) | nginx: 봇 복제 · 정적 · 구운 HTML · SSR 캐시 · 언어 이동 · 장애 시 |
+| [요청 경로](docs/diagrams/04-request-routing.png) | nginx: 봇 복제 · 정적 자산 · SSG 페이지 · SSR 캐시 · 언어 이동 · 장애 시 |
 | [알림 흐름](docs/diagrams/05-alert-flow.png) | 감지(vmalert) → 전달(Alertmanager) → 채널, 오류 예산 소진 속도(SLO) 규칙 |
 | [스마트 압축](docs/diagrams/07-smart-compress.png) | 보통 크기 탐색(v5·병렬 v6)과 큰 사진 모자이크 탐색, 원본 유지 조건 |
 
@@ -106,7 +106,7 @@ ADMIN_PW=... node e2e/monitoring.mjs   # 통계→지표→알림 전체 경로 
 - **업로드 없음**: 개인정보를 약속이 아니라 구조로 보장. 오피스·한글 문서 → PDF처럼 브라우저 안에서 정확히 만들 수 없는 변환은 지원하지 않음
 - **스마트 압축은 목표 화질 기준**: '품질 80' 같은 고정값 대신 SSIM 목표를 넘는 가장 작은 파일. Kodak 22장 × 품질 1\~100 전체 인코딩 정답표로 탐색 버전을 비교(평균 7.7회 → 2.4\~4.2회, 손해 0%)
 - **판정 기준은 기준 데이터와 검증 데이터를 분리**: 색 번짐·사진 판별 기준은 한 묶음으로 정하고 처음 보는 데이터로만 확인
-- **하이브리드 렌더링**: 크롤러가 JS 없이 읽게 주요 페이지는 미리 굽고, 롱테일은 SSR + 캐시. SSR이 죽어도 캐시·정적 404로 동작
+- **하이브리드 렌더링(SSG + 스트리밍 SSR)**: 주요 페이지는 빌드 시점 정적 생성(SSG)으로 크롤러가 JS 없이 본문을 읽게 하고, 조합이 수천 개라 전부 만들어 둘 수 없는 롱테일은 요청 시 스트리밍 SSR + nginx 캐시(200 하루·404 10분·만료 후 일주일 stale). SSR이 죽어도 캐시·정적 404로 동작
 - 측정·틀린 가설까지 남긴 개발 기록은 [`docs/devlog.md`](docs/devlog.md), 확장·이전 대비 설계는 [`docs/cloud-target.md`](docs/cloud-target.md), 다음 방향은 [`docs/next-steps.md`](docs/next-steps.md)
 
 ## 알려진 한계

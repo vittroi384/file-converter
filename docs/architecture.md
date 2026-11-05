@@ -9,7 +9,7 @@
 | [01 시스템 구성도](diagrams/01-system.png) | 기기(화면·풀·워커)와 서버(nginx·SSR·API·VictoriaMetrics·Logs·vmalert·Alertmanager) |
 | [02 데이터 모델(ERD)](diagrams/02-data-model.png) | 통계 이벤트 → 지표 시계열·로그, 알림 설정 → 규칙·AM 파일 |
 | [03 변환 흐름](diagrams/03-convert-flow.png) | 파일 놓기 → 옵션 검사 → 비용·한도 → 풀 입장 → 워커 → 결과 → 통계 |
-| [04 요청 경로](diagrams/04-request-routing.png) | nginx: 봇 복제 · 정적 · 구운 HTML · SSR 캐시 · 언어 이동 · 장애 시 |
+| [04 요청 경로](diagrams/04-request-routing.png) | nginx: 봇 복제 · 정적 자산 · SSG 페이지 · SSR 캐시 · 언어 이동 · 장애 시 |
 | [05 알림 흐름](diagrams/05-alert-flow.png) | 감지 → 판단(vmalert) → 전달(Alertmanager) → 채널 |
 | [06 배포 구성](diagrams/06-deploy.png) | compose 서비스·포트·메모리 상한·볼륨, 한 Dockerfile에서 두 이미지 |
 | [07 스마트 압축](diagrams/07-smart-compress.png) | 보통 크기 탐색(v5)과 큰 사진 모자이크 탐색, 원본 유지 조건 |
@@ -58,11 +58,11 @@
 | 우아한 성능 저하(Graceful degradation) | 사파리 대체 경로, SSR 장애 시 캐시·정적 404, 스크롤 장면의 정적 그림 | 기능이 없거나 죽은 부분이 있어도 핵심은 돈다 |
 | 묶음 전송(Batching) | `telemetry.ts` 큐(20개 또는 5초), 닫을 때 `sendBeacon`, 실패하면 `fetch(keepalive)`로 한 번 | 요청 수를 줄인다. **재시도는 없다**(통계가 일부 빠져도 괜찮은 자료라서) |
 | 되돌리기(Rollback) | `PUT /api/admin/settings` | 새 설정 적용(reload)이 실패하면 이전 파일로 되돌리고 다시 reload |
-| 하이드레이션(Hydration) | `entry-client.tsx` `hydrateRoot` | 구운 HTML·SSR 결과 위에 같은 React 트리를 붙인다 |
+| 하이드레이션(Hydration) | `entry-client.tsx` `hydrateRoot` | SSG·SSR로 받은 HTML 위에 같은 React 트리를 붙인다 |
 
 ## 렌더링
 
-- SSG: `scripts/prerender.mjs`가 10개 언어 × (첫 화면 + 안내 27쪽) = 280쪽을 React 19 `prerenderToNodeStream`으로 굽는다. 사이트맵 470주소, `llms.txt`·`llms-full.txt`, `.gz`·`.br`.
+- SSG: `scripts/prerender.mjs`가 10개 언어 × (첫 화면 + 안내 27쪽) = 280페이지를 빌드 시점에 React 19 `prerenderToNodeStream`으로 정적 생성한다(정적 사이트 생성, Static Site Generation — 요청 전에 완성된 HTML 파일을 만들어 두어 크롤러가 JS 없이 읽고 첫 화면이 바로 뜬다). 사이트맵 470주소, `llms.txt`·`llms-full.txt`, `.gz`·`.br`.
 - SSR: 목록에 없는 변환 조합(`/ja/avif-to-png` 등)과 404는 `scripts/ssr-server.mjs`가 `renderToPipeableStream`으로 그린다. nginx가 200은 하루, 404는 10분 캐시하고 만료 뒤 일주일은 옛 것을 주며 뒤에서 갱신.
 - 언어: '/'에 처음 온 사람(언어 쿠키 없음·봇 아님)은 SSR 서버가 Accept-Language q값으로 고른 언어 주소로 302. 영어면 정적 첫 화면을 그대로(X-Accel-Redirect).
 - 브로틀리(`.br`)는 nginx 공식 이미지에 모듈이 없어 지금은 `.gz`만 쓴다.
