@@ -4,6 +4,7 @@
 import { createFile, DataStream, Endianness, MP4BoxBuffer } from 'mp4box';
 import { Muxer as Mp4Muxer, ArrayBufferTarget as Mp4Target } from 'mp4-muxer';
 import { Muxer as WebmMuxer, ArrayBufferTarget as WebmTarget } from 'webm-muxer';
+import { repairAvcC } from './avcc.ts';
 import { GIFEncoder } from 'gifenc/src/index.js'; // 원본 모듈에서: 묶음본(dist)은 안 쓰는 quantize까지 딸려 온다
 import { palettize } from './gifpal.ts';
 import { ConvertError, type OpContext, type OpRunner } from '../core/types.ts';
@@ -238,6 +239,13 @@ async function processVideo(v: VTrack, opt: { target: Target; res?: number; fps:
   let low = 0;
   out.forEach((c, i) => { c.cto = c.ts - sorted[i]!; low = Math.min(low, c.cto); });
   if (low < 0) out.forEach(c => { c.cto -= low; });
+  if (opt.target === 'mp4' && meta?.decoderConfig) {
+    const key = out.find(c => c.key);
+    const d = meta.decoderConfig.description;
+    const desc = d ? (ArrayBuffer.isView(d) ? new Uint8Array(d.buffer, d.byteOffset, d.byteLength) : new Uint8Array(d)) : undefined;
+    const fixed = key ? repairAvcC(desc, key.data) : desc;
+    if (fixed !== desc) meta = { ...meta, decoderConfig: { ...meta.decoderConfig, description: fixed } };
+  }
   return { chunks: out, meta, codec: encCfg!.codec, w, h, fps };
 }
 

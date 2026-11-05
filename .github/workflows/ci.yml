@@ -65,5 +65,6 @@ jobs:
       - run: docker compose -f infra/docker-compose.yml --env-file "$RUNNER_TEMP/fc.env" up -d --build --wait
       - run: node e2e/stack.mjs
       - run: node e2e/monitoring.mjs
+        env: { COMPOSE: 'docker compose -f infra/docker-compose.yml --env-file ${{ runner.temp }}/fc.env' } # API 멈춤·재시작 시험도 같은 설정 파일로
       - if: failure()
         run: docker compose -f infra/docker-compose.yml --env-file "$RUNNER_TEMP/fc.env" logs --tail 200
