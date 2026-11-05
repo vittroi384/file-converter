@@ -1,0 +1,21 @@
+# 데이터 소스(고정 uid — 대시보드 JSON이 이 uid로 찾는다)
+apiVersion: 1
+datasources:
+  - name: VictoriaMetrics
+    uid: vm
+    type: prometheus # VictoriaMetrics는 Prometheus 질의 API와 호환
+    access: proxy
+    url: http://victoriametrics:8428
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: 30s # 긁는 주기(infra/vm/scrape.yml)와 같게: $__rate_interval 계산에 쓴다
+      prometheusType: Prometheus
+      httpMethod: POST
+  # 플러그인(victoriametrics-logs-datasource)이 안 깔렸으면 이 소스와 '로그' 대시보드만 '플러그인 없음'으로 뜬다
+  - name: VictoriaLogs
+    uid: vlogs
+    type: victoriametrics-logs-datasource
+    access: proxy
+    url: http://victorialogs:9428
+    editable: false

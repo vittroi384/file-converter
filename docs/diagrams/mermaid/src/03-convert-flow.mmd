@@ -1,0 +1,42 @@
+%% 변환 한 번의 흐름. 파일 바이트는 탭 안(화면 스레드 ↔ 워커)에서만 움직인다.
+sequenceDiagram
+  autonumber
+  actor U as 사용자
+  participant T as Tool (화면)
+  participant C as client.ts
+  participant P as 플러그인 명세
+  participant W as WorkerPool
+  participant K as Worker
+  participant X as 텔레메트리
+
+  U->>T: 파일 놓기 · 붙여넣기 · 공유
+  T->>T: 형식 판별 → 추천 작업·옵션
+  U->>T: 실행
+  T->>C: convert(files, op, options)
+  C->>P: validate(options)
+  P-->>C: 정리된 옵션 (모르는 키 버림)
+  C->>C: 파일 머리 256KB만 읽어 가로·세로
+  C->>P: cost(inputs, options)
+  alt 예상 메모리 > 기기 한도(예산×3)
+    C-->>T: too-large (필요·한도 숫자)
+    T-->>U: "약 X 필요, 한도 약 Y. 더 작은 크기 또는 PC"
+  else 들어감
+    C->>W: run(job, cost) — 파일 전체 읽기
+    W->>W: 예산 안이면 입장, 넘치면 대기
+    W->>K: postMessage(입력, 전달·복사 없음)
+    K->>P: validate 한 번 더
+    K->>K: plugin.load() → WASM 코덱 (처음 한 번)
+    K-->>W: 진행률
+    W-->>T: 진행률 표시
+    K-->>W: 결과 바이트 + meta
+    alt 무거운 작업(>640MB)
+      W->>K: 워커 버리기(메모리 반환)
+    end
+    W-->>C: 결과
+    C-->>T: 결과 · 비교 · 받기
+    C-)X: op·형식·크기·시간 (파일 이름·내용 없음)
+  end
+  opt 취소
+    U->>T: 취소
+    T->>W: cancel → 워커 종료 후 새로
+  end

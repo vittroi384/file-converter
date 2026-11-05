@@ -1,0 +1,68 @@
+# CI: 타입 검사 · 단위 시험 · 빌드 · 용량 예산 → 브라우저 시험 4엔진 → 운영 스택(docker compose) 전체 경로.
+# 로컬에서 같은 것: npm run check && npx playwright test && node e2e/stack.mjs
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+
+# 한 줄 { } 안에 ${{ }}를 넣으면 YAML이 중괄호로 읽어 깨진다(yaml.safe_load로 확인) → 여러 줄로
+concurrency:
+  group: "ci-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - run: npm run check # typecheck → test(web·api·shared) → build(SSG 280쪽) → budget
+      - uses: actions/upload-artifact@v4
+        with: { name: dist, path: 'apps/web/dist*', retention-days: 3 }
+
+  e2e:
+    needs: check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      # EXIF 회전 정답(Pillow)·PDF 그림 비교(PyMuPDF)를 시험이 파이썬으로 부른다
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - run: pip install pillow pymupdf
+      - run: npm ci
+      - run: npx playwright install --with-deps msedge webkit firefox
+      - run: npm run build
+      - run: npx playwright test --reporter=github,html
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: playwright-report, path: 'playwright-report/', retention-days: 7 }
+
+  stack:
+    needs: check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      # 시험용 비밀값은 그 자리에서 만들어 쓰고 버린다(저장소·로그에 남기지 않음)
+      - name: test env
+        run: |
+          PW="ci-$(openssl rand -hex 12)"
+          echo "::add-mask::$PW"
+          {
+            # 해시에 '$'가 들어 있어 작은따옴표로 감싼다(안 그러면 compose가 변수로 해석해 해시가 깨진다)
+            echo "ADMIN_PASSWORD_HASH='$(node tools/hash-password.ts "$PW")'"
+            echo "SESSION_SECRET=$(openssl rand -hex 32)"
+            echo "SECURE_COOKIE=false"
+          } > "$RUNNER_TEMP/fc.env"
+          echo "ADMIN_PW=$PW" >> "$GITHUB_ENV" # monitoring.mjs가 관리자로 로그인
+      - run: docker compose -f infra/docker-compose.yml --env-file "$RUNNER_TEMP/fc.env" up -d --build --wait
+      - run: node e2e/stack.mjs
+      - run: node e2e/monitoring.mjs
+      - if: failure()
+        run: docker compose -f infra/docker-compose.yml --env-file "$RUNNER_TEMP/fc.env" logs --tail 200

@@ -1,0 +1,1341 @@
+{
+  "uid": "lc-logs",
+  "title": "LocalConvert · 로그",
+  "description": "브라우저 오류 상세(VictoriaLogs). 메시지는 저장 전에 경로·파일명·주소를 지운 것",
+  "editable": false,
+  "graphTooltip": 1,
+  "schemaVersion": 41,
+  "version": 1,
+  "tags": [
+    "localconvert"
+  ],
+  "timezone": "browser",
+  "refresh": "1m",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "30s",
+      "1m",
+      "5m",
+      "15m"
+    ]
+  },
+  "fiscalYearStartMonth": 0,
+  "liveNow": false,
+  "weekStart": "",
+  "links": [
+    {
+      "type": "dashboards",
+      "tags": [
+        "localconvert"
+      ],
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "",
+      "icon": "external link",
+      "tooltip": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "브라우저 오류",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "vm"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "vm"
+          },
+          "refId": "A",
+          "expr": "sum(increase(fc_client_errors_total[$__range]))",
+          "legendFormat": "",
+          "range": false,
+          "instant": true,
+          "editorMode": "code"
+        }
+      ],
+      "description": "1건 이상 주황, 20건 이상 빨강",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 20
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "value",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 13,
+          "valueSize": 26
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "로그 전송 실패",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "vm"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "vm"
+          },
+          "refId": "A",
+          "expr": "sum(increase(fc_log_push_errors_total[$__range]))",
+          "legendFormat": "",
+          "range": false,
+          "instant": true,
+          "editorMode": "code"
+        }
+      ],
+      "description": "VictoriaLogs로 로그를 못 보낸 횟수(0이어야 정상, 1건 이상 빨강)",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              },
+              {
+                "color": "#d03b3b",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "value",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 13,
+          "valueSize": 26
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "오류 로그 추이 (어디서)",
+      "gridPos": {
+        "x": 4,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "vlogs"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "vlogs"
+          },
+          "refId": "A",
+          "expr": "source:=client | stats by (where) count() hits",
+          "queryType": "statsRange",
+          "editorMode": "code",
+          "legendFormat": "{{where}}"
+        }
+      ],
+      "interval": "1m",
+      "maxDataPoints": 200,
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#898781"
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 85,
+            "lineWidth": 0,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "showPoints": "never",
+            "axisSoftMin": 0,
+            "axisBorderShow": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "image"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "이미지 변환"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#9085e9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "compress"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "사진 용량 줄이기"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#c98500"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "heic"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "HEIC 변환"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#008300"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "psd"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "PSD 변환"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#898781"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "svg"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "SVG 변환"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#898781"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pdf-merge"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "PDF 합치기"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#898781"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pdf-split"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "PDF 나누기"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#898781"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pdf-to-image"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "PDF → 이미지"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#898781"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "image-to-pdf"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "PDF로 묶기"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#898781"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pdf-compress"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "PDF 용량 줄이기"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d55181"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "data"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "데이터 변환"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#898781"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ocr"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "글자 추출(OCR)"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#898781"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "video"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "영상 변환"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#e66767"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ui"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "화면"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "worker"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "변환기"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d95926"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pwa"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "앱 설치(PWA)"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#199e70"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "admin"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "관리자 화면"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#898781"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "bargauge",
+      "title": "오류 종류별",
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "vm"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "vm"
+          },
+          "refId": "A",
+          "expr": "sort_desc(sum(increase(fc_client_errors_total[$__range])) by (code) > 0)",
+          "legendFormat": "{{code}}",
+          "range": false,
+          "instant": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#3987e5"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#3987e5",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unsupported"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "지원 안 하는 형식"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "decode"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "파일을 열 수 없음"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "encode"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "저장 실패"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "too-large"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "파일이 너무 큼"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "out-of-memory"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "메모리 부족"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "worker-crash"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "변환기 멈춤"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "timeout"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "시간 초과"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cancelled"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "취소됨"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "password"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "암호 걸린 PDF"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unknown"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "알 수 없는 오류"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true,
+        "valueMode": "text",
+        "namePlacement": "left",
+        "sizing": "manual",
+        "minVizHeight": 14,
+        "maxVizHeight": 18,
+        "minVizWidth": 8,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "legend": {
+          "showLegend": false
+        },
+        "text": {
+          "titleSize": 12,
+          "valueSize": 13
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "row",
+      "title": "최근 기록",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "panels": []
+    },
+    {
+      "id": 6,
+      "type": "table",
+      "title": "최근 브라우저 오류",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 24,
+        "h": 12
+      },
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "vlogs"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "vlogs"
+          },
+          "refId": "A",
+          "expr": "source:=client | sort by (_time desc) | limit 200",
+          "queryType": "instant",
+          "editorMode": "code"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "labels",
+            "format": "auto",
+            "replace": false,
+            "keepTime": false
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Time",
+                "where",
+                "code",
+                "browser",
+                "Line"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "Time": 0,
+              "where": 1,
+              "code": 2,
+              "browser": 3,
+              "Line": 4
+            },
+            "renameByName": {
+              "Time": "시각",
+              "where": "위치",
+              "code": "오류",
+              "browser": "브라우저",
+              "Line": "메시지"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false,
+            "filterable": false
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "시각"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:MM-DD HH:mm:ss"
+              },
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "위치"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "image": {
+                        "text": "이미지 변환",
+                        "index": 0
+                      },
+                      "compress": {
+                        "text": "사진 용량 줄이기",
+                        "index": 1
+                      },
+                      "heic": {
+                        "text": "HEIC 변환",
+                        "index": 2
+                      },
+                      "psd": {
+                        "text": "PSD 변환",
+                        "index": 3
+                      },
+                      "svg": {
+                        "text": "SVG 변환",
+                        "index": 4
+                      },
+                      "pdf-merge": {
+                        "text": "PDF 합치기",
+                        "index": 5
+                      },
+                      "pdf-split": {
+                        "text": "PDF 나누기",
+                        "index": 6
+                      },
+                      "pdf-to-image": {
+                        "text": "PDF → 이미지",
+                        "index": 7
+                      },
+                      "image-to-pdf": {
+                        "text": "PDF로 묶기",
+                        "index": 8
+                      },
+                      "pdf-compress": {
+                        "text": "PDF 용량 줄이기",
+                        "index": 9
+                      },
+                      "data": {
+                        "text": "데이터 변환",
+                        "index": 10
+                      },
+                      "ocr": {
+                        "text": "글자 추출(OCR)",
+                        "index": 11
+                      },
+                      "video": {
+                        "text": "영상 변환",
+                        "index": 12
+                      },
+                      "ui": {
+                        "text": "화면",
+                        "index": 13
+                      },
+                      "worker": {
+                        "text": "변환기",
+                        "index": 14
+                      },
+                      "pwa": {
+                        "text": "앱 설치(PWA)",
+                        "index": 15
+                      },
+                      "admin": {
+                        "text": "관리자 화면",
+                        "index": 16
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "오류"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "unsupported": {
+                        "text": "지원 안 하는 형식",
+                        "index": 0
+                      },
+                      "decode": {
+                        "text": "파일을 열 수 없음",
+                        "index": 1
+                      },
+                      "encode": {
+                        "text": "저장 실패",
+                        "index": 2
+                      },
+                      "too-large": {
+                        "text": "파일이 너무 큼",
+                        "index": 3
+                      },
+                      "out-of-memory": {
+                        "text": "메모리 부족",
+                        "index": 4
+                      },
+                      "worker-crash": {
+                        "text": "변환기 멈춤",
+                        "index": 5
+                      },
+                      "timeout": {
+                        "text": "시간 초과",
+                        "index": 6
+                      },
+                      "cancelled": {
+                        "text": "취소됨",
+                        "index": 7
+                      },
+                      "password": {
+                        "text": "암호 걸린 PDF",
+                        "index": 8
+                      },
+                      "unknown": {
+                        "text": "알 수 없는 오류",
+                        "index": 9
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "브라우저"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        },
+        "sortBy": [
+          {
+            "displayName": "시각",
+            "desc": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "type": "table",
+      "title": "서버 로그 (관리자 로그인 실패 등)",
+      "gridPos": {
+        "x": 0,
+        "y": 21,
+        "w": 24,
+        "h": 7
+      },
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "vlogs"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "vlogs"
+          },
+          "refId": "A",
+          "expr": "source:=api | sort by (_time desc) | limit 100",
+          "queryType": "instant",
+          "editorMode": "code"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "labels",
+            "format": "auto",
+            "replace": false,
+            "keepTime": false
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Time",
+                "level",
+                "where",
+                "Line"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "Time": 0,
+              "level": 1,
+              "where": 2,
+              "Line": 3
+            },
+            "renameByName": {
+              "Time": "시각",
+              "level": "수준",
+              "where": "위치",
+              "Line": "메시지"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false,
+            "filterable": false
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "시각"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:MM-DD HH:mm:ss"
+              },
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "수준"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "error": {
+                        "text": "오류",
+                        "index": 0
+                      },
+                      "warn": {
+                        "text": "경고",
+                        "index": 1
+                      },
+                      "info": {
+                        "text": "정보",
+                        "index": 2
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "위치"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "image": {
+                        "text": "이미지 변환",
+                        "index": 0
+                      },
+                      "compress": {
+                        "text": "사진 용량 줄이기",
+                        "index": 1
+                      },
+                      "heic": {
+                        "text": "HEIC 변환",
+                        "index": 2
+                      },
+                      "psd": {
+                        "text": "PSD 변환",
+                        "index": 3
+                      },
+                      "svg": {
+                        "text": "SVG 변환",
+                        "index": 4
+                      },
+                      "pdf-merge": {
+                        "text": "PDF 합치기",
+                        "index": 5
+                      },
+                      "pdf-split": {
+                        "text": "PDF 나누기",
+                        "index": 6
+                      },
+                      "pdf-to-image": {
+                        "text": "PDF → 이미지",
+                        "index": 7
+                      },
+                      "image-to-pdf": {
+                        "text": "PDF로 묶기",
+                        "index": 8
+                      },
+                      "pdf-compress": {
+                        "text": "PDF 용량 줄이기",
+                        "index": 9
+                      },
+                      "data": {
+                        "text": "데이터 변환",
+                        "index": 10
+                      },
+                      "ocr": {
+                        "text": "글자 추출(OCR)",
+                        "index": 11
+                      },
+                      "video": {
+                        "text": "영상 변환",
+                        "index": 12
+                      },
+                      "ui": {
+                        "text": "화면",
+                        "index": 13
+                      },
+                      "worker": {
+                        "text": "변환기",
+                        "index": 14
+                      },
+                      "pwa": {
+                        "text": "앱 설치(PWA)",
+                        "index": 15
+                      },
+                      "admin": {
+                        "text": "관리자 화면",
+                        "index": 16
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        },
+        "sortBy": [
+          {
+            "displayName": "시각",
+            "desc": true
+          }
+        ]
+      }
+    }
+  ]
+}

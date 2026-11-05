@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><link rel="stylesheet" href="arch.css"><title>LocalConvert 스마트 압축</title>
+<style>body { word-break: keep-all; } .lane .stack { gap: 0; }</style></head>
+<body><div class="page">
+  <h1>LocalConvert 스마트 압축</h1>
+  <p class="sub">목표 화질(SSIM) 이상 중 가장 작은 파일 · 탐색은 밝기 SSIM, 고른 결과는 색까지 한 번 더 · 전부 브라우저 워커 안</p>
+
+  <div class="row c-1-2">
+    <div class="card user"><span class="role">입력</span><h3>사진 + 목표</h3><p>목표 SSIM 0.8~0.999(기본 0.98) · 형식 자동이면 PNG·WebP → WebP, 나머지 → JPG</p></div>
+    <div class="card app"><span class="role">디코드</span><h3>펼치기 · 미리 줄이기</h3><p>크기 줄이기를 고르면 목표의 2배까지만 펼침 · EXIF 방향 적용 · JPG면 흰 배경에 합침</p></div>
+  </div>
+  <div class="arrow v"><span>384px 조각이 24칸 이상(약 350만 화소)인가?</span></div>
+
+  <div class="row c2 lane">
+    <div class="zone app" style="margin-top:6px"><span class="zone-title">아니오 · 보통 크기 — core/search.ts v5</span>
+      <div class="stack">
+        <div class="card app"><span class="role">시작점</span><h3>사전 분포에서 예측</h3><p>형식·목표별 guess · step · slope(한 장씩 빼고 학습한 표)</p></div>
+        <div class="arrow v"><span></span></div>
+        <div class="card app"><span class="role">한 번 시도</span><h3>인코딩 → 디코드 → SSIM</h3><p>ssimRgba: 11줄 고리 버퍼 · 메모리 620MB → 1MB</p>
+          <div class="chips"><span class="chip data">통과한 것 중 가장 작은 하나만 보관</span></div></div>
+        <div class="arrow v"><span>구간 폭 1이 될 때까지</span></div>
+        <div class="card app"><span class="role">다음 품질</span><h3>점프 · 보간 · 이분</h3><p>멀면 기울기로 뉴턴 점프 · 가까우면 -log(1-SSIM) 공간 보간 · 같은 쪽이 두 번 연속 움직이면 이분</p>
+          <div class="chips"><span class="chip">→ 다시 한 번 시도</span></div></div>
+      </div>
+      <div class="chips"><span class="chip data">평균 2.4~4.2번(v1 이분 7.7번)</span><span class="chip data">손해 0%(WebP 0.95만 평균 0.21%)</span></div>
+    </div>
+
+    <div class="zone ext" style="margin-top:6px"><span class="zone-title">예 · 큰 사진 — core/search-large.ts</span>
+      <div class="stack">
+        <div class="card ext"><span class="role">모자이크</span><h3>조각 12개로 축소판</h3><p>원본 해상도 384px 조각 · 세부 정도 순으로 줄 세워 밋밋한 곳부터 복잡한 곳까지 고르게(분위수)</p></div>
+        <div class="arrow v"><span>보통 크기와 같은 탐색</span></div>
+        <div class="card ext"><span class="role">전체 1회</span><h3>찾은 품질로 원본 인코딩</h3><p>원본 SSIM으로 확인 · 화질 약속이 먼저, 용량은 그다음</p>
+          <div class="chips"><span class="chip sec">미달이면 기울기만큼 올려 다시(최대 2번)</span></div></div>
+        <div class="card sec" style="margin-top:14px"><span class="role">모자이크 v1 · 버린 방법</span><h3>세부 많은 조각만 → 빗나감</h3><p>SSIM은 밋밋한 곳의 작은 변화에 민감 → WebP·AVIF 원본 미달, JPG는 과한 품질</p></div>
+      </div>
+      <div class="chips"><span class="chip ext">5000만 화소 57.9초 → 12.7초</span><span class="chip ext">18/18 목표 충족 · 손해 평균 1.9%</span></div>
+    </div>
+  </div>
+
+  <div class="row c2" style="margin-top:0">
+    <div class="arrow v"><span>가장 작은 통과 결과</span></div>
+    <div class="arrow v"><span>원본 SSIM ≥ 목표</span></div>
+  </div>
+
+  <div class="card data"><span class="role">색 검사 v3 · 한 번만</span><h3>밝기는 통과, 색은?</h3>
+    <p>고른 결과의 Cb·Cr SSIM을 본다 · 색 평균 &lt; 0.92, 또는 밝기−색 &gt; 0.043, 또는 색 하위 5% 구역 &lt; 0.74면 4:2:0 색 번짐</p>
+    <div class="chips"><span class="chip data">기준은 Kodak 사진으로만: 잘못 걸림 0/181</span><span class="chip data">처음 보는 색 그림 29/36 잡음(두 세트 각각)</span><span class="chip sec">7/36은 여전히 놓침</span></div>
+  </div>
+  <div class="row c2" style="margin-top:0">
+    <div class="arrow v"><span>통과(사진은 거의 다)</span></div>
+    <div class="arrow v"><span class="no">색 번짐</span></div>
+  </div>
+  <div class="row c2">
+    <div class="card data"><span class="role">결과</span><h3>원본보다 작으면 결과</h3>
+      <p>같은 형식이고 크기를 안 줄였는데 결과가 더 크면 → 메타데이터를 지운 원본(GPS·카메라 정보 제거, 방향 태그만 남김)</p>
+      <div class="chips"><span class="chip sec">크기 줄이기를 골랐으면 원본을 주지 않음</span></div></div>
+    <div class="card ext"><span class="role">4:4:4로 다시 찾기</span><h3>색을 줄이지 않는 인코딩</h3>
+      <p>형식 자동이면 AVIF(+17%로 가장 효율), 고른 JPG·AVIF면 그대로 · 결과 색이 모자라면 품질 +8(최대 2번)</p>
+      <div class="chips"><span class="chip ext">AVIF 색 0.41 → 0.999</span><span class="chip sec">WebP는 방법 없음 → 안내만</span></div></div>
+  </div>
+
+  <div class="foot">
+    <div class="facts"><span><b>정답표</b> Kodak 22장 × 3형식 × 품질 1~100 = 6,600회 인코딩</span><span><b>평가</b> 시험 사진은 학습에서 빼고(LOO)</span><span><b>근거</b> devlog 3 · 12 · 23절</span></div>
+    <div class="legend"><span><i class="user"></i>입력</span><span><i class="app"></i>보통 크기 탐색</span><span><i class="ext"></i>큰 사진·4:4:4</span><span><i class="data"></i>판정·결과</span><span><i class="sec"></i>한계·주의</span></div>
+  </div>
+</div></body></html>

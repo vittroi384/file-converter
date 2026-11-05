@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><link rel="stylesheet" href="arch.css"><title>LocalConvert 요청 경로</title></head>
+<body><div class="page ka">
+  <h1>LocalConvert 요청 경로</h1>
+  <p class="sub">nginx가 요청 하나를 처리하는 순서(infra/nginx/default.conf) · nginx :8080 하나(앞단 리버스 프록시 뒤) · e2e/stack.mjs 27항목으로 검사</p>
+
+  <div class="flow" style="grid-template-columns: 300px 150px 1fr; gap: 12px">
+    <div class="card user"><span class="role">들어온 요청</span><h3>요청</h3><p>앞단 리버스 프록시(HTTPS) → :8080</p></div>
+    <div class="arrow h dash"><span>봇이면 복제</span></div>
+    <div class="card net"><span class="role">mirror /__crawl · 응답과 무관</span><h3>봇 복제 → api:9464/internal/crawl</h3><p>UA가 봇 같으면(map $is_bot) UA·주소를 머리글로 넘김 · 봇이 아니면 204로 끝 · 분류는 API(classifyCrawler)</p>
+      <div class="chips"><span class="chip net">SSR로 넘어간 요청도 셈</span><span class="chip user">/assets · /api · /__lang은 복제 안 함</span></div>
+    </div>
+  </div>
+  <div class="arrow v" style="width:300px"><span>경로로 분기 (location)</span></div>
+
+  <div class="zone"><span class="zone-title">nginx :8080 — 경로별 처리</span>
+    <div class="row c3">
+      <div class="card data"><span class="role">/assets/*</span><h3>정적 · 1년 캐시</h3><p>해시 붙은 파일 · immutable</p></div>
+      <div class="card app"><span class="role">/api/*</span><h3>api:8787</h3><p>통계 받기 · 관리자 · 본문 64KB까지</p></div>
+      <div class="card sec"><span class="role">/__ssr/*</span><h3>404</h3><p>내부 전용 경로는 밖에서 못 엶</p></div>
+    </div>
+    <div class="row c3 mt">
+      <div class="card net"><span class="role">/en · /en/*</span><h3>301 → 접두어 없는 주소</h3><p>영어는 /x가 정식</p></div>
+      <div class="card net"><span class="role">끝에 /</span><h3>301 → / 없는 주소</h3><p>/x/ → /x</p></div>
+      <div class="card data"><span class="role">/demo · /icons · sw.js 등</span><h3>정적</h3><p>하루 캐시 · 서비스 워커·매니페스트는 매번 확인</p></div>
+    </div>
+
+    <div class="row c2" style="margin-top:0">
+      <div class="arrow v"><span>'/'</span></div>
+      <div class="arrow v"><span>그 밖 (location /)</span></div>
+    </div>
+
+    <div class="row c2">
+      <div class="stack" style="gap:0">
+        <div class="card net"><span class="role">판단 · $pick_lang</span><h3>언어 쿠키 없음 + 봇 아님?</h3><p>처음 온 사람만 언어를 골라 줌</p></div>
+        <div class="row c2" style="margin-top:0">
+          <div class="arrow v"><span>아니오</span></div>
+          <div class="arrow v"><span>예</span></div>
+        </div>
+        <div class="row c2">
+          <div class="card data"><span class="role">정적</span><h3>영어 첫 화면</h3><p>index.html · no-cache · Vary: Accept-Language, Cookie</p></div>
+          <div class="card app"><span class="role">ssr:8790/__lang</span><h3>언어 고르기</h3><p>Accept-Language q값 계산 · <span class="nw">no-store</span></p>
+            <table class="fields"><tr><td>en</td><td><span class="nw">X-Accel-Redirect</span> → 정적 첫 화면 그대로</td></tr><tr><td>ko · ja …</td><td>302 → /ko 등</td></tr></table></div>
+        </div>
+        <div class="card sec mt"><span class="role">SSR 죽음 · 502 503 504</span><h3>그래도 영어 첫 화면</h3><p>error_page → /__static/index.html</p></div>
+      </div>
+
+      <div class="stack" style="gap:0">
+        <div class="card net"><span class="role">판단 · try_files</span><h3>구운 파일 있음?</h3><p><span class="mono">$uri</span> · <span class="mono">$uri/index.html</span></p></div>
+        <div class="row c2" style="margin-top:0">
+          <div class="arrow v"><span>있음</span></div>
+          <div class="arrow v"><span>없음 → @ssr</span></div>
+        </div>
+        <div class="row c2">
+          <div class="card data"><span class="role">SSG</span><h3>구운 HTML</h3><p>.gz 미리 압축(gzip_static) · <span class="nw">no-cache</span></p></div>
+          <div class="card net"><span class="role">proxy_cache ssr · 키 $uri</span><h3>SSR 캐시</h3><p>같은 주소 동시 요청은 하나만 렌더(lock)</p></div>
+        </div>
+        <div class="row c3" style="margin-top:0; gap:12px">
+          <div class="arrow v"><span>HIT</span></div>
+          <div class="arrow v"><span>MISS</span></div>
+          <div class="arrow v"><span>만료 · 오류</span></div>
+        </div>
+        <div class="row c3" style="gap:12px">
+          <div class="card data"><span class="role">HIT</span><h3>캐시 응답</h3><p>X-Cache 머리글</p></div>
+          <div class="card app"><span class="role">ssr:8790</span><h3>스트리밍 렌더</h3><p>200 하루 · 404 10분 저장</p></div>
+          <div class="card data"><span class="role">stale</span><h3>옛 것 주기</h3><p>뒤에서 갱신</p></div>
+        </div>
+        <div class="row c3" style="margin-top:0; gap:12px">
+          <div></div>
+          <div class="arrow v dash"><span>SSR 죽음 + 캐시 없음</span></div>
+          <div></div>
+        </div>
+        <div class="card sec"><span class="role">error_page 502 503 504 =404</span><h3>정적 404.html</h3><p>SSR이 내려가도 빈 화면 대신 404 페이지</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="facts"><span><b>보안 머리글</b> 정적·SSR 모두 snippets/security.conf</span><span><b>SSR 캐시</b> 200은 하루, 만료 뒤 일주일까지 옛 것을 주며 갱신</span><span><b>압축</b> gzip · 미리 만든 .gz 우선</span></div>
+    <div class="legend"><span><i class="user"></i>요청</span><span><i class="net"></i>판단·이동</span><span><i class="app"></i>Node 서버</span><span><i class="data"></i>정적·캐시 응답</span><span><i class="sec"></i>막음·장애 대비</span></div>
+  </div>
+</div></body></html>

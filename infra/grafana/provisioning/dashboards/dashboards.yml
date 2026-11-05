@@ -1,0 +1,12 @@
+# 대시보드는 infra/grafana/dashboards/*.json 이 원본. 화면에서 고쳐도 저장되지 않는다(파일을 고친다)
+apiVersion: 1
+providers:
+  - name: localconvert
+    folder: LocalConvert
+    folderUid: localconvert
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/dashboards

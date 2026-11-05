@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="120" viewBox="0 0 400 120">
+  <rect width="400" height="120" fill="#ffffff"/>
+  <rect x="0" y="100" width="400" height="20" fill="#d03b3b"/>
+  <text x="20" y="70" font-family="sans-serif" font-size="44" fill="#111111">LocalConvert 안녕 123</text>
+</svg>

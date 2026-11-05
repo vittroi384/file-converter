@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><link rel="stylesheet" href="arch.css"><title>LocalConvert 알림 흐름</title>
+<style>body { word-break: keep-all; } .span2 { grid-column: span 2; }</style></head>
+<body><div class="page">
+  <h1>LocalConvert 알림 흐름</h1>
+  <p class="sub">감지 → 판단(vmalert) → 전달(Alertmanager) → 채널 · 채널로는 Alertmanager가 직접 보낸다 → API가 죽어도 'API 응답 없음'은 간다</p>
+
+  <div class="zone app"><span class="zone-title">① 감지 · 숫자로 남긴다</span>
+    <div class="row c3">
+      <div class="card app"><span class="role">API 카운터</span><h3>통계 → 지표</h3><p>변환 성공·실패 · 처리 시간 · 브라우저 오류 · 통계 거부 · LCP · 방문 · 로그 전송 실패</p>
+        <div class="chips"><span class="chip">시작 때 0으로 만들어 둠</span></div></div>
+      <div class="card app"><span class="role">합성 감시 · prober.ts</span><h3>1분마다 직접 열어 봄</h3><p>첫 화면 · CSP/COEP · 안내 페이지 · SSR · API · llms.txt</p>
+        <div class="chips"><span class="chip">fc_probe_success</span><span class="chip user">UA에 bot 없음 → 집계 안 섞임</span></div></div>
+      <div class="card ops"><span class="role">긁기 결과</span><h3>up{job="api"}</h3><p>VictoriaMetrics가 API 지표를 30초마다 긁었는지 · 0이면 API가 죽었거나 끊김</p></div>
+    </div>
+  </div>
+
+  <div class="arrow v"><span>VictoriaMetrics에 저장(90일)</span></div>
+
+  <div class="zone ops"><span class="zone-title">② 판단 · vmalert 30초마다 · 규칙 11개 + 생존 신호</span>
+    <div class="row c4">
+      <div class="card sec"><span class="role">critical · 3개</span><h3>바로 알린다</h3><p>API 응답 없음(N분) · 오류 예산 빠른 소진(1시간·5분 둘 다 14.4배, 약&nbsp;2일) · 사이트 점검 실패(N분)</p></div>
+      <div class="card net"><span class="role">warning · 7개</span><h3>살펴볼 것</h3><p>오류 예산 느린 소진(6시간·30분 6배, 약&nbsp;5일) · 성공률 낮음(10건 이상일 때) · 변환 느려짐(p95) · 브라우저 오류 급증 · 통계 거부 급증 · 첫 화면 느림(LCP p75) · 로그 저장 실패</p></div>
+      <div class="card user"><span class="role">info · 1개</span><h3>방문 끊김</h3><p>N시간 방문 0 · 기본 꺼짐</p><p>주소·DNS·인증서 문제 의심</p></div>
+      <div class="card ext"><span class="role">생존 신호</span><h3>Watchdog</h3><p>vector(1) · 늘 울림 · 수집 → 평가 → 전송 경로를 전부 거친다</p></div>
+    </div>
+  </div>
+
+  <div class="arrow v"><span>울리는 알림(firing)</span></div>
+
+  <div class="zone ops"><span class="zone-title">③ 전달 · Alertmanager</span>
+    <div class="row c4">
+      <div class="card ops"><span class="role">묶기</span><h3>같은 알림 하나로</h3><p>알림 이름별 · 30초 모아서 · 해결 안 되면 repeatHours(기본 4시간)마다 다시</p></div>
+      <div class="card sec"><span class="role">critical</span><h3>방해 금지 무시</h3><p>새벽에도 보낸다 · 1시간마다 다시</p></div>
+      <div class="card net"><span class="role">warning · info</span><h3>방해 금지 시간엔 조용히</h3><p>기본 00:00~08:00(서울) · 끄거나 바꿀 수 있음</p></div>
+      <div class="card ext"><span class="role">Watchdog 전용</span><h3>사람에게 안 감</h3><p>바깥 주소로만 · 방해 금지 무관 · 실측 60초 간격</p></div>
+    </div>
+  </div>
+
+  <div class="row c2" style="margin-top:0">
+    <div class="arrow v"><span>보냄 · 해결도 알림</span></div>
+    <div class="arrow v"><span>1분마다 '살아 있음'</span></div>
+  </div>
+  <div class="row c2">
+    <div class="card ext"><span class="role">④ 알림 채널</span><h3>텔레그램 · 디스코드 · 이메일 · 웹훅</h3><p>한국어 문구 · 기준값과 현재 값을 함께</p></div>
+    <div class="card ext"><span class="role">④ 외부 생존 신호</span><h3>healthchecks.io 등</h3><p>신호가 끊기면 그쪽이 알린다 → 서버 전체나 감시 경로 일부가 멈춰도 안다</p></div>
+  </div>
+
+  <div class="card sec mt"><span class="role">관리자 화면</span><h3>기준값 · 켜기/끄기 · 채널 · 1시간 조용히 · 테스트 알림</h3>
+    <p>저장 → 검사 → 규칙·Alertmanager 파일 새로 쓰기(반쯤 쓴 파일 안 보이게) → vmalert·Alertmanager 다시 읽기</p>
+    <div class="chips"><span class="chip sec">다시 읽기 실패 → 이전 설정으로 되돌리고 이유 표시</span><span class="chip sec">비밀값은 가려서 보냄</span><span class="chip ops">vmalert는 30초마다 규칙 파일 다시 읽기</span></div>
+  </div>
+
+  <div class="zone" style="margin-top:28px"><span class="zone-title">단계별로 죽으면</span>
+    <div class="row c4">
+      <div class="card app"><span class="role">변환 워커</span><h3>그 작업만 실패</h3><p>워커를 새로 만들어 다음 작업 계속</p><div class="chips"><span class="chip user">pool.test.ts</span></div></div>
+      <div class="card sec"><span class="role">메모리 부족 위험</span><h3>시작 전 안내</h3><p>'약 X 필요, 한도 Y' · 크기 줄이기를 고르면 진행</p><div class="chips"><span class="chip user">e2e 메모리 작은 기기</span></div></div>
+      <div class="card app"><span class="role">SSR 서버</span><h3>캐시로 버팀</h3><p>캐시된 페이지는 계속 · 없는 주소는 정적 404 · '/'는 영어 첫 화면</p><div class="chips"><span class="chip user">e2e/stack.mjs</span></div></div>
+      <div class="card app"><span class="role">API</span><h3>변환은 그대로</h3><p>서버가 필요 없다 · 통계만 빠짐 · API 응답 없음 알림</p><div class="chips"><span class="chip user">monitoring.mjs</span></div></div>
+      <div class="card ops"><span class="role">vmalert</span><h3>규칙 없이 시작</h3><p>API 건강 확인 뒤 시작 · 30초마다 규칙 다시 읽기</p><div class="chips"><span class="chip user">devlog 8절</span></div></div>
+      <div class="card ops"><span class="role">알림 설정 적용</span><h3>이전 설정 복구</h3><p>되돌리고 화면에 이유</p><div class="chips"><span class="chip user">server.test.ts</span></div></div>
+      <div class="card net span2"><span class="role">서버 전체 · 감시 경로 일부</span><h3>바깥에서 안다</h3><p>1분마다 가던 생존 신호가 끊겨 외부 서비스가 알린다 · 관리자 화면에 주소만 넣으면 켜짐</p><div class="chips"><span class="chip user">e2e/deadman.mjs</span></div></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="facts"><span><b>규칙</b> apps/api/src/alerting.ts RULES · 파일은 자동 생성</span><span><b>소진 속도</b> 30일 성공률 목표 기본 99%</span><span><b>생존 신호</b> 처음 120초 간격 → repeat 30초로 고쳐 60초</span></div>
+    <div class="legend"><span><i class="user"></i>정보·확인</span><span><i class="net"></i>warning·바깥 경로</span><span><i class="app"></i>애플리케이션</span><span><i class="ext"></i>채널·외부</span><span><i class="sec"></i>critical·관리</span><span><i class="ops"></i>운영·알림</span></div>
+  </div>
+</div></body></html>

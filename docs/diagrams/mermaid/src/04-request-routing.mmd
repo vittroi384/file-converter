@@ -1,0 +1,28 @@
+%% nginx가 요청 하나를 처리하는 순서(infra/nginx/default.conf). e2e/stack.mjs 27항목으로 검사.
+flowchart TD
+  R["요청"] --> Bot{"UA가 봇?<br/>(map $is_bot)"}
+  Bot -->|예| Mirror["mirror → api:9464/internal/crawl<br/>classifyCrawler · crawlKind"]
+  Bot --> Path
+  Mirror -.->|"응답과 무관"| Path
+
+  Path{"경로"}
+  Path -->|"/assets/*"| Imm["정적 · 1년 캐시(immutable)"]
+  Path -->|"/api/*"| API["api:8787"]
+  Path -->|"/en, /en/*"| R301["301 → 접두어 없는 주소"]
+  Path -->|"끝에 /"| Slash["301 → / 없는 주소"]
+  Path -->|"/__ssr/*"| N404["404 (내부 전용)"]
+  Path -->|"/"| Root{"언어 쿠키 없음<br/>그리고 봇 아님?"}
+  Path -->|"그 밖"| Try{"구운 파일 있음?<br/>$uri · $uri/index.html"}
+
+  Root -->|아니오| Home["정적 영어 첫 화면"]
+  Root -->|예| Lang["ssr:/__lang<br/>Accept-Language q값 계산"]
+  Lang -->|"en"| Accel["X-Accel-Redirect → 정적 첫 화면"]
+  Lang -->|"ko, ja …"| R302["302 → /ko 등"]
+  Lang -.->|"SSR 죽음"| Home
+
+  Try -->|있음| SSG["구운 HTML (.gz 미리 압축)"]
+  Try -->|없음| Cache{"SSR 캐시"}
+  Cache -->|HIT| Hit["캐시 응답"]
+  Cache -->|MISS| SSR["ssr:8790 스트리밍 렌더<br/>200 하루 · 404 10분"]
+  Cache -->|"만료 · SSR 오류"| Stale["옛 것을 주며 뒤에서 갱신"]
+  SSR -.->|"SSR 죽음 + 캐시 없음"| S404["정적 404.html"]

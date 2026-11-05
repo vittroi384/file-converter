@@ -1,0 +1,29 @@
+{
+  "name": "file-converter",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @fc/web",
+    "dev:api": "npm run dev -w @fc/api",
+    "build": "npm run build -w @fc/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "budget": "node tools/check-budget.mjs",
+    "check": "npm run typecheck && npm test && npm run build && npm run budget",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "^1.64.1",
+    "@tesseract.js-data/eng": "^1.0.0",
+    "@tesseract.js-data/kor": "^1.0.0",
+    "@types/node": "^26.6.6",
+    "mermaid": "^11.17.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}

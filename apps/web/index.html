@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="<!--app-lang-->">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- 테마를 그리기 전에 적용(깜빡임 방지). CSP가 인라인 스크립트를 막으므로 외부 파일 -->
+    <script src="/theme.js"></script>
+    <!--app-head-->
+    <meta name="theme-color" content="#f6f2ea" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14130f" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/icons/favicon-48.png" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <!--app-data-->
+    <script type="module" src="/src/entry-client.tsx"></script>
+  </body>
+</html>

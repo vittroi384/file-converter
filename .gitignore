@@ -1,0 +1,26 @@
+node_modules
+dist
+.env
+.env.*
+!.env.example
+*.log
+*.local
+test-results
+playwright-report
+bench/out
+dist-server
+
+# 서버 백업(infra/backup.sh)
+backups/
+
+# OCR 엔진·학습 데이터(빌드 때 node_modules에서 복사)
+apps/web/public/ocr/
+
+# api 로컬 실행 때 생기는 알림 설정·규칙 파일
+apps/api/data/
+
+# 벤치 데이터 중 받거나 만들어 쓰는 것(bench/README.md)
+bench/data/large/
+bench/data/pdf-flate/
+bench/data/kodak/
+bench/data/assets/

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><link rel="stylesheet" href="arch.css"><title>LocalConvert 시스템 아키텍처</title></head>
+<body><div class="page ka">
+  <h1>LocalConvert 시스템 아키텍처</h1>
+  <p class="sub">파일을 서버로 보내지 않는 변환기 · 변환은 브라우저 탭 안(Web Worker + WebAssembly) · 서버는 페이지와 익명 숫자만 · Docker Compose</p>
+
+  <div class="zone app"><span class="zone-title">사용자 기기 · 브라우저 탭 — 파일은 여기서만</span>
+    <div class="row c-2-1">
+      <div class="card app"><span class="role">화면 · React 19</span><h3>Tool · 비교 · 명령 팔레트</h3>
+        <p>파일 놓기·붙여넣기·공유 → 형식 판별 → 추천 작업 · 10개 언어 · 스크롤 장면(CSS만)</p>
+        <div class="chips"><span class="chip">변환기 플러그인 13종 + 내부 3</span><span class="chip">옵션 검사 · 메모리 비용</span><span class="chip sec">기기 한도 넘으면 시작 전 안내</span></div>
+      </div>
+      <div class="card ext"><span class="role">기기 안 저장</span><h3>최근 변환</h3><p>IndexedDB · 7일 · 300MB · 끌 수 있음</p></div>
+    </div>
+    <div class="arrow v"><span>WorkerPool: 메모리 예산 · 취소 · 시간 초과 · 무거운 작업자 재활용</span></div>
+    <div class="row c3">
+      <div class="card app"><span class="role">Web Worker × N</span><h3>사진</h3><p>jSquash(mozjpeg·webp·avif·oxipng) · libheif · <span class="nw">ag-psd</span> · resvg<br>스마트 압축: 밝기·색 SSIM 탐색 · 모자이크</p></div>
+      <div class="card app"><span class="role">Web Worker × N</span><h3>PDF · 데이터 · 영상</h3><p>pdf-lib · pdf.js · 같은 사진 합치기 · <span class="nw">Flate 사진→JPEG</span> · SheetJS · <span class="nw">인코딩 판별</span><br>WebCodecs(H.264·VP9·AAC·Opus) · mp4box · GIF</p></div>
+      <div class="card ext"><span class="role">화면 쪽 실행</span><h3>글자 인식 · 글자 있는 SVG</h3><p>tesseract.js(한·영) · 브라우저 SVG 렌더러</p></div>
+    </div>
+    <div class="row c2 mt">
+      <div class="card sec"><span class="role">보안 · 개인정보</span><h3>CSP connect-src 'self'</h3><p>브라우저가 다른 서버로의 연결을 막는다 · 결과 파일의 GPS·카메라 정보 제거</p></div>
+      <div class="card user"><span class="role">통계</span><h3>telemetry.ts</h3><p>숫자와 허용 목록 값만 · 20개씩 묶어 sendBeacon · 파일 이름·내용 없음</p></div>
+    </div>
+  </div>
+
+  <div class="arrow v"><span>HTTPS · 페이지·코드는 처음 한 번 · 이후엔 익명 숫자만</span></div>
+  <div class="card net"><span class="role">앞단 리버스 프록시</span><h3>HTTPS 종단</h3><p>Let's Encrypt 인증서 · DuckDNS 도메인 · web(nginx):8080으로</p></div>
+  <div class="arrow v"><span>:8080 (리버스 프록시에서만)</span></div>
+
+  <div class="zone"><span class="zone-title">서버 한 대 · Docker Compose</span>
+    <div class="card net"><span class="role">리버스 프록시</span><h3>nginx 1.29</h3>
+      <p>구운 HTML 280쪽(.gz) 먼저 → 없으면 SSR(캐시 하루) · 보안 머리글 · '/'는 Accept-Language로 언어 이동</p>
+      <div class="chips"><span class="chip net">봇 요청 복제(mirror) → 크롤러 집계</span><span class="chip sec">COOP·COEP·CSP</span><span class="chip">/en/x → /x</span></div>
+    </div>
+    <div class="row c2" style="margin-top:0">
+      <div class="arrow v"><span>없는 주소</span></div>
+      <div class="arrow v"><span>/api · 봇 복제</span></div>
+    </div>
+    <div class="row c2">
+      <div class="card app"><span class="role">스트리밍 SSR</span><h3>ssr · Node 24</h3><p>React renderToPipeableStream · 롱테일 변환 조합 · 404 · 언어 고르기(q값)</p></div>
+      <div class="card app"><span class="role">API</span><h3>api · Fastify 5</h3><p>:8787 통계 받기·관리자 · :9464 지표·크롤러(내부)</p>
+        <div class="chips"><span class="chip">합성 감시 1분</span><span class="chip sec">관리자 scrypt·세션</span><span class="chip data">fc_build_info</span></div>
+      </div>
+    </div>
+    <div class="row c4 mt">
+      <div class="db data"><svg viewBox="0 0 96 112"><ellipse cx="48" cy="16" rx="40" ry="12" fill="#d1fae5" stroke="#10b981" stroke-width="5"/><path d="M8 16v80c0 7 18 12 40 12s40-5 40-12V16" fill="#ecfdf5" stroke="#10b981" stroke-width="5"/><path d="M8 44c0 7 18 12 40 12s40-5 40-12M8 72c0 7 18 12 40 12s40-5 40-12" fill="none" stroke="#10b981" stroke-width="5"/></svg><span class="role">지표</span><h3>VictoriaMetrics</h3><p>90일 · 30초마다 긁기</p></div>
+      <div class="db data"><svg viewBox="0 0 96 112"><ellipse cx="48" cy="16" rx="40" ry="12" fill="#d1fae5" stroke="#10b981" stroke-width="5"/><path d="M8 16v80c0 7 18 12 40 12s40-5 40-12V16" fill="#ecfdf5" stroke="#10b981" stroke-width="5"/><path d="M8 44c0 7 18 12 40 12s40-5 40-12M8 72c0 7 18 12 40 12s40-5 40-12" fill="none" stroke="#10b981" stroke-width="5"/></svg><span class="role">로그</span><h3>VictoriaLogs</h3><p>브라우저 오류 · 30일</p></div>
+      <div class="card ops"><span class="role">규칙 평가</span><h3>vmalert</h3><p>규칙 11개 + 생존 신호 · <span class="nw">30초마다</span><br>규칙 파일 다시 읽기</p></div>
+      <div class="card ops"><span class="role">알림 전달</span><h3>Alertmanager</h3><p>묶기 · 방해 금지(critical 예외) · <span class="nw">1시간 조용히</span></p></div>
+    </div>
+  </div>
+
+  <div class="row c2 mt">
+    <div class="card ext"><span class="role">알림 채널</span><h3>텔레그램 · 디스코드 · 이메일 · 웹훅</h3><p>관리자 화면에서 설정 · 테스트 알림 · 실패하면 이전 설정 복구</p></div>
+    <div class="card ext"><span class="role">외부 생존 신호</span><h3>healthchecks.io 등</h3><p>1분마다 '살아 있음' → 끊기면 바깥에서 알림(서버 전체 장애 대비)</p></div>
+  </div>
+
+  <div class="foot">
+    <div class="facts"><span><b>배포</b> deploy.sh: 빌드 번호 → 교체 → 점검 → 실패 시 되돌림</span><span><b>백업</b> 설정·지표 스냅샷·로그 · 14일 · SHA-256</span><span><b>CI</b> 단위 239 · E2E 250(4엔진) · 운영 경로 31항목</span></div>
+    <div class="legend"><span><i class="user"></i>사용자·통계</span><span><i class="net"></i>네트워크·프록시</span><span><i class="app"></i>애플리케이션</span><span><i class="data"></i>데이터</span><span><i class="ext"></i>외부·기기 기능</span><span><i class="sec"></i>보안·개인정보</span><span><i class="ops"></i>운영·알림</span></div>
+  </div>
+</div></body></html>

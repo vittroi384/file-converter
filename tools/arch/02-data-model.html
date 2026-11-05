@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><link rel="stylesheet" href="arch.css"><title>LocalConvert 데이터 모델</title></head>
+<body><div class="page ka">
+  <h1>LocalConvert 데이터 모델</h1>
+  <p class="sub">관계형 DB 없음 · 파일 내용은 어디에도 저장하지 않는다 · 서버에 남는 건 익명 숫자(지표)·오류 로그·알림 설정 파일뿐</p>
+
+  <div class="zone app"><span class="zone-title">브라우저 → POST /api/t — 익명 이벤트 묶음</span>
+    <div class="flow" style="grid-template-columns: 1fr 150px 1.6fr; gap: 12px">
+      <div class="card user"><span class="role">묶음</span><h3>TelemetryBatch</h3>
+        <table class="fields"><tr><td>v</td><td>1 (스키마 버전)</td></tr><tr><td>events</td><td>1~50개 · 20개 모이면 sendBeacon</td></tr></table>
+      </div>
+      <div class="arrow h"><span>1 : 1~50</span></div>
+      <div class="card user"><span class="role">이벤트 · 판별 키 t</span><h3>TelemetryEvent</h3>
+        <table class="fields"><tr><td>t</td><td>conv | vital | err | pv → 네 종류 중 하나 · 이벤트마다 따로 검증, 틀린 것만 버림</td></tr></table>
+      </div>
+    </div>
+    <div class="row c4" style="margin-top:0">
+      <div class="arrow v"><span>t=conv</span></div><div class="arrow v"><span>t=vital</span></div><div class="arrow v"><span>t=err</span></div><div class="arrow v"><span>t=pv</span></div>
+    </div>
+    <div class="row c4">
+      <div class="card app"><span class="role">변환</span><h3>Conversion</h3>
+        <table class="fields"><tr><td>op</td><td>작업 12종</td></tr><tr><td>from · to</td><td>형식 18종</td></tr><tr><td>ok</td><td>성공 여부</td></tr><tr><td>ms</td><td>≤ 30분</td></tr><tr><td>inBytes</td><td>≤ 4GB</td></tr><tr><td>outBytes</td><td>선택</td></tr><tr><td>err</td><td>선택 · 오류 코드 10종</td></tr><tr><td>files</td><td>1~1000</td></tr></table>
+      </div>
+      <div class="card app"><span class="role">웹 성능</span><h3>Vital</h3>
+        <table class="fields"><tr><td>name</td><td>LCP INP CLS FCP TTFB</td></tr><tr><td>value</td><td>≤ 600,000</td></tr><tr><td>rating</td><td>good · <span class="nw">needs-improvement</span> · poor</td></tr></table>
+      </div>
+      <div class="card app"><span class="role">오류</span><h3>Error</h3>
+        <table class="fields"><tr><td>where</td><td>작업 · ui · worker · pwa</td></tr><tr><td>code</td><td>오류 코드</td></tr><tr><td>msg</td><td>300자 · 서버가 경로·이름·메일·URL 지움</td></tr></table>
+      </div>
+      <div class="card app"><span class="role">페이지 열람</span><h3>PageView</h3>
+        <table class="fields"><tr><td>path</td><td>/ · /admin · landing · other</td></tr><tr><td>locale</td><td>10개 언어</td></tr><tr><td>ref</td><td>direct · internal · chatgpt … 15종</td></tr></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="row c4" style="margin-top:0">
+    <div class="arrow v"><span>inc · observe</span></div><div class="arrow v"><span>observe · inc</span></div><div class="arrow v"><span>push · inc</span></div><div class="arrow v"><span>inc</span></div>
+  </div>
+
+  <div class="zone data" style="margin-top:0"><span class="zone-title">서버 · 지표(VictoriaMetrics 90일)와 로그(VictoriaLogs 30일)</span>
+    <div class="row c4">
+      <div class="stack">
+        <div class="card data"><span class="role">counter</span><h3 class="mono" style="font-size:15px">fc_conversions_total</h3><p class="small">op · from · to · result · err · browser · device</p></div>
+        <div class="card data"><span class="role">histogram · 성공만</span><h3 class="mono" style="font-size:15px">duration · input_bytes · size_ratio</h3><p class="small">처리 시간(op·device) · 입력 크기 · 결과/입력 비율</p></div>
+      </div>
+      <div class="stack">
+        <div class="card data"><span class="role">histogram</span><h3 class="mono" style="font-size:15px">fc_web_vital_ms · _cls</h3><p class="small">name · device (CLS만 따로)</p></div>
+        <div class="card data"><span class="role">counter</span><h3 class="mono" style="font-size:15px">fc_web_vital_ratings_total</h3><p class="small">name · rating · device</p></div>
+      </div>
+      <div class="stack">
+        <div class="card data"><span class="role">로그 한 줄</span><h3>LOG_ENTRY</h3>
+          <table class="fields"><tr><td>_msg</td><td>지운 메시지</td></tr><tr><td>level</td><td><span class="nw">error · warn · info</span></td></tr><tr><td>source</td><td>client · api</td></tr><tr><td>where</td><td>작업 · ui 등</td></tr><tr><td>code</td><td>오류 코드</td></tr><tr><td>browser<br>device</td><td>UA에서 분류</td></tr></table>
+        </div>
+        <div class="card data"><span class="role">counter</span><h3 class="mono" style="font-size:15px">fc_client_errors_total</h3><p class="small">where · code · browser</p></div>
+      </div>
+      <div class="stack">
+        <div class="card data"><span class="role">counter</span><h3 class="mono" style="font-size:15px">fc_page_views_total</h3><p class="small">path · device · browser · locale</p></div>
+        <div class="card data"><span class="role">counter · ref ≠ internal</span><h3 class="mono" style="font-size:15px">fc_referrals_total</h3><p class="small">source · path · locale · 사이트 밖에서 온 첫 페이지만</p></div>
+      </div>
+    </div>
+    <div class="flow mt" style="grid-template-columns: 1fr 150px 1fr; gap: 12px">
+      <div class="card net"><span class="role">nginx mirror · 봇만</span><h3>CRAWL_HIT</h3>
+        <table class="fields"><tr><td>X-Crawl-UA</td><td>원래 요청의 UA</td></tr><tr><td>X-Crawl-Path</td><td>원래 요청 주소 → api:9464/internal/crawl</td></tr></table>
+      </div>
+      <div class="arrow h"><span>분류 → inc</span></div>
+      <div class="card data"><span class="role">counter</span><h3 class="mono" style="font-size:15px">fc_crawler_hits_total</h3><p class="small">bot(16종) · kind(page · landing · llms · sitemap · robots · other)</p></div>
+    </div>
+    <p class="note mt">알림 전용 카운터(fc_alert_conversions_total · fc_alert_client_errors_total)와 수신 결과(fc_telemetry_events_total)는 시작 때 0으로 만들어 둔다.</p>
+  </div>
+
+  <div class="zone ops"><span class="zone-title">알림 설정 파일 — 관리자 화면에서 편집 · alert-settings.json</span>
+    <div class="card ops"><span class="role">설정 한 벌</span><h3>ALERT_SETTINGS</h3>
+      <table class="fields"><colgroup><col style="width:170px"><col></colgroup><tr><td>quietHours</td><td>enabled · start · end (HH:MM, 기본 00:00~08:00)</td></tr><tr><td>repeatHours</td><td>1~72 (기본 4)</td></tr><tr><td>rules · channels</td><td>아래 네 갈래로</td></tr></table>
+    </div>
+    <div class="row c4" style="margin-top:0">
+      <div class="arrow v"><span>rules (11)</span></div><div class="arrow v"><span>channels</span></div><div class="arrow v"><span>renderRules</span></div><div class="arrow v"><span>renderAlertmanager</span></div>
+    </div>
+    <div class="row c4">
+      <div class="card ops"><span class="role">규칙마다</span><h3>RULE_SETTING</h3>
+        <table class="fields"><tr><td>id</td><td>ApiDown 등 11개</td></tr><tr><td>enabled</td><td>켜기·끄기</td></tr><tr><td>threshold</td><td>규칙별 최소~최대</td></tr><tr><td>for</td><td>지속 시간</td></tr></table>
+      </div>
+      <div class="card ops"><span class="role">채널 5개</span><h3>CHANNELS</h3>
+        <table class="fields"><tr><td>telegram</td><td>botToken · chatId</td></tr><tr><td>discord</td><td>webhookUrl</td></tr><tr><td>email</td><td>smarthost · from · to</td></tr><tr><td>webhook</td><td>url</td></tr><tr><td>deadman</td><td>url (생존 신호)</td></tr></table>
+        <p class="small">비밀값은 화면에 가려서 보냄</p>
+      </div>
+      <div class="card ops"><span class="role">vmalert가 읽음</span><h3>규칙 YAML</h3><p>켠 규칙만 · 생존 신호를 켜면 Watchdog 추가</p></div>
+      <div class="card ops"><span class="role">Alertmanager가 읽음</span><h3>alertmanager YAML</h3><p>채널 · 방해 금지 시간(critical 예외) · 반복 간격</p></div>
+    </div>
+    <p class="note mt">저장: 임시 파일에 쓰고 이름 바꾸기 → 두 서비스 reload → 하나라도 실패하면 이전 파일로 되돌림</p>
+  </div>
+
+  <div class="zone ext"><span class="zone-title">기기 안 저장 — 서버로 가지 않음</span>
+    <div class="flow" style="grid-template-columns: 1fr 150px 1.4fr 1fr; gap: 12px">
+      <div class="card user"><span class="role">화면</span><h3>변환 결과</h3><p>Tool이 결과 파일을 받으면</p></div>
+      <div class="arrow h"><span>history.add()</span></div>
+      <div class="card ext"><span class="role">IndexedDB lc-history · items</span><h3>HistoryItem</h3>
+        <table class="fields"><tr><td>id</td><td>자동 증가 키</td></tr><tr><td>at</td><td>저장 시각 (색인)</td></tr><tr><td>name · type · size</td><td>파일 이름 · 형식 · 크기</td></tr><tr><td>op</td><td>작업</td></tr><tr><td>data</td><td>ArrayBuffer (WebKit Blob 문제로)</td></tr></table>
+      </div>
+      <div class="card ext"><span class="role">정리 규칙</span><h3>7일 · 300MB</h3><p>넘으면 오래된 것부터 삭제 · 끄기는 localStorage lc_history_off</p></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="facts"><span><b>검증</b> zod 스키마(packages/shared) · 라벨 값은 허용 목록 안에서만</span><span><b>개인정보</b> 파일 이름·내용·사용자 식별자 없음</span></div>
+    <div class="legend"><span><i class="user"></i>묶음·화면</span><span><i class="net"></i>프록시</span><span><i class="app"></i>이벤트</span><span><i class="data"></i>지표·로그</span><span><i class="ext"></i>기기 안 저장</span><span><i class="ops"></i>알림 설정</span></div>
+  </div>
+</div></body></html>

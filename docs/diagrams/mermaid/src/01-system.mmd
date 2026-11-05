@@ -1,0 +1,42 @@
+%% 시스템 구성도: 파일은 브라우저 밖으로 나가지 않는다. 서버로 가는 건 페이지 요청과 익명 숫자(통계)뿐.
+flowchart TB
+  subgraph Device["사용자 기기 · 브라우저 탭 — 파일은 여기서만"]
+    direction LR
+    UI["화면 (React 19)<br/>Tool · 비교 · 명령 팔레트"]
+    Client["client.ts<br/>옵션 검사 · 비용 예측 · 한도"]
+    Pool["WorkerPool<br/>메모리 예산 · 취소 · 재활용"]
+    Plugins["Web Worker × N<br/>변환기 플러그인 + WASM 코덱"]
+    Tel["telemetry.ts<br/>숫자만 보냄"]
+    UI --> Client --> Pool --> Plugins
+    UI -.-> Tel
+  end
+
+  subgraph Server["서버 · docker compose — 공개 포트는 8080 하나"]
+    direction LR
+    Nginx["nginx :8080<br/>구운 HTML 280쪽 · CSP<br/>SSR 캐시 · 크롤러 복제"]
+    SSR["ssr :8790<br/>스트리밍 SSR<br/>롱테일 주소 · 언어 고르기"]
+    API["api (Fastify)<br/>:8787 통계·관리자<br/>:9464 지표·크롤러(내부)"]
+    VM[("VictoriaMetrics<br/>지표 90일")]
+    VL[("VictoriaLogs<br/>오류 로그 30일")]
+    VMA["vmalert<br/>규칙 11개 + 생존 신호"]
+    AM["Alertmanager<br/>묶기 · 방해 금지"]
+    Nginx -->|"없는 주소"| SSR
+    Nginx -->|"/api · 봇 복제"| API
+    API -->|"브라우저 오류"| VL
+    VM -->|"30초마다 긁기"| API
+    VM -->|긁기| SSR
+    VMA -->|질의| VM
+    VMA --> AM
+    API -.->|"설정 쓰기 + reload"| VMA
+  end
+
+  Channels["텔레그램 · 디스코드 · 이메일 · 웹훅"]
+
+  UI <-->|"페이지·코드 (처음 한 번)"| Nginx
+  Tel -->|"익명 숫자"| Nginx
+  AM --> Channels
+
+  classDef local fill:#fdf6ec,stroke:#c2410c,color:#1c1917;
+  classDef srv fill:#f5f5f4,stroke:#57534e,color:#1c1917;
+  class UI,Client,Pool,Plugins,Tel local;
+  class Nginx,SSR,API,VM,VL,VMA,AM srv;

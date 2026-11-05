@@ -1,0 +1,8 @@
+{
+  "name": "@fc/shared",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts", "./schema": "./src/schema.ts" },
+  "scripts": { "typecheck": "tsc -p .", "test": "vitest run" },
+  "dependencies": { "zod": "^4.6.7" }
+}

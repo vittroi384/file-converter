@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><link rel="stylesheet" href="arch.css"><title>LocalConvert 변환 흐름</title></head>
+<body><div class="page ka">
+  <h1>LocalConvert 변환 흐름</h1>
+  <p class="sub">변환 한 번 · 파일 바이트는 탭 안(화면 스레드 ↔ Web Worker)에서만 움직인다 · 서버로 가는 건 숫자뿐</p>
+
+  <div class="zone app"><span class="zone-title">사용자 기기 · 브라우저 탭</span>
+    <div class="flow" style="grid-template-columns: 600px 130px 1fr; gap: 12px">
+      <div class="card user"><span class="role">사용자 · Tool 화면</span><h3><span class="n">1</span>파일 놓기 · 붙여넣기 · 공유</h3><p>형식 판별 → 추천 작업과 옵션 → 실행</p></div>
+      <div></div><div></div>
+    </div>
+    <div class="arrow v" style="width:600px"><span>convert(files, op, options)</span></div>
+    <div class="flow" style="grid-template-columns: 600px 130px 1fr; gap: 12px">
+      <div class="card app"><span class="role">client.ts · 플러그인 명세</span><h3><span class="n">2</span>옵션 검사</h3><p>plugin.validate → 정리된 옵션 · 모르는 키는 버림 · 맞지 않으면 바로 오류</p></div>
+      <div></div><div></div>
+    </div>
+    <div class="arrow v" style="width:600px"><span>파일 머리 256KB만 읽기</span></div>
+    <div class="flow" style="grid-template-columns: 600px 130px 1fr; gap: 12px">
+      <div class="card app"><span class="role">client.ts · plugin.cost</span><h3><span class="n">3</span>예상 메모리 계산</h3><p>머리에서 가로·세로 → 작업별 배수로 예상 바이트 · 한도 = 기기 메모리 예산 × 3</p></div>
+      <div class="arrow h"><span class="no">한도 초과</span></div>
+      <div class="card sec"><span class="role">too-large</span><h3>시작 전 안내</h3><p>파일 전체를 읽기 전에 멈춤 · "약 X 필요, 한도 약 Y" → 더 작은 크기나 PC 권함</p></div>
+    </div>
+    <div class="arrow v" style="width:600px"><span>들어감 → 파일 전체 읽기</span></div>
+    <div class="flow" style="grid-template-columns: 600px 130px 1fr; gap: 12px">
+      <div class="card app"><span class="role">WorkerPool · 작업자 최대 6개</span><h3><span class="n">4</span>입장 · 대기</h3><p>메모리 예산 안이면 입장, 넘치면 대기열 · 입력 버퍼는 복사 없이 넘김(transfer) · <span class="nw">시간 초과 5분</span></p></div>
+      <div class="arrow h dash"><span>mainThread면 대신</span></div>
+      <div class="card ext"><span class="role">화면 쪽 실행</span><h3>mainThread 플러그인</h3><p>글자 인식(OCR · tesseract.js)은 워커를 거치지 않고 처음부터 여기서</p></div>
+    </div>
+    <div class="arrow v" style="width:600px"><span>postMessage</span></div>
+    <div class="flow" style="grid-template-columns: 600px 130px 1fr; gap: 12px">
+      <div class="card app"><span class="role">Web Worker</span><h3><span class="n">5</span>변환 실행</h3><p>validate 한 번 더 → plugin.load()로 WASM 코덱(처음 한 번) → 진행률을 화면에 → <span class="nw">결과 바이트 + meta</span></p>
+        <div class="chips"><span class="chip">예상 640MB 넘은 작업 뒤엔 워커 버림(메모리 반환)</span></div>
+      </div>
+      <div class="arrow h dash"><span>워커에서 못 함</span></div>
+      <div class="card ext"><span class="role">화면 쪽에서 다시</span><h3>같은 플러그인 재실행</h3><p><span class="mono">no-offscreen</span>: 워커 캔버스 없는 브라우저의 PDF→이미지 · <span class="mono">svg-text-main</span>: 글자 있는 SVG</p></div>
+    </div>
+    <div class="arrow v" style="width:600px"><span>결과</span></div>
+    <div class="flow" style="grid-template-columns: 600px 130px 1fr; gap: 12px">
+      <div class="card user"><span class="role">Tool 화면</span><h3><span class="n">6</span>결과 · 비교 · 받기</h3><p>켜 두었으면 최근 변환에 저장(IndexedDB · 7일 · 300MB)</p></div>
+      <div class="arrow h"><span>track()</span></div>
+      <div class="card user"><span class="role">telemetry.ts</span><h3><span class="n">7</span>통계 한 줄</h3><p>op · 형식 · 크기 · 시간 · 파일 수 · 성공 여부 · 파일 이름·내용 없음</p></div>
+    </div>
+    <div class="row c2 mt">
+      <div class="card sec"><span class="role">취소 · 언제든</span><h3>cancel</h3><p>대기 중이면 대기열에서 빼고, 실행 중이면 워커를 끝내고 새 워커로 교체(WASM은 중간에 못 멈춤) · 취소는 통계에 안 보냄</p></div>
+      <div class="card sec"><span class="role">실패</span><h3>오류 코드로 정리</h3><p>워커 충돌 · 시간 초과 · 메모리 부족 등 → 실패 통계 + 오류 이벤트(메시지는 서버가 한 번 더 걸러 냄)</p></div>
+    </div>
+  </div>
+
+  <div class="arrow v"><span>20개씩 묶어 sendBeacon · 숫자와 허용 목록 값만</span></div>
+  <div class="card net"><span class="role">서버</span><h3>POST /api/t</h3><p>스키마 검증 → 지표(VictoriaMetrics) · 오류는 로그(VictoriaLogs)</p></div>
+
+  <div class="foot">
+    <div class="facts"><span><b>메모리 예산</b> 기기 메모리의 25%(PC) · 15%(폰), 384MB~2GB</span><span><b>작업자 수</b> CPU 코어 − 1, 최대 6</span><span><b>코덱</b> 쓸 때만 불러옴</span></div>
+    <div class="legend"><span><i class="user"></i>화면·통계</span><span><i class="net"></i>서버</span><span><i class="app"></i>변환 경로</span><span><i class="ext"></i>화면 쪽 실행</span><span><i class="sec"></i>멈춤·안내</span></div>
+  </div>
+</div></body></html>

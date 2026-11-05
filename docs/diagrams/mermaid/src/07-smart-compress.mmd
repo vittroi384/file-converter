@@ -1,0 +1,36 @@
+%% 스마트 압축: "목표 SSIM 이상 중 가장 작은 파일". 숫자는 bench/ 실측(Kodak 22장, 큰 사진 18장 — docs/devlog.md 3·12절).
+flowchart TB
+  In["사진"] --> Dec["디코드<br/>크기 줄이기 선택 시 목표 2배로 미리 축소<br/>EXIF 방향 적용"]
+  Dec --> Big{"350만 화소 이상?"}
+
+  subgraph Normal["보통 크기 — core/search.ts v5"]
+    direction TB
+    Prior["시작 품질 = 사전 분포(LOO)<br/>형식·목표별 guess · step · slope"]
+    Probe["인코딩 → 디코드 → SSIM<br/>ssimRgba: 11줄 링 버퍼 (620MB → 1MB)"]
+    Step["다음 품질 고르기<br/>멀면 뉴턴 점프(기울기)<br/>가까우면 로그 공간 보간<br/>같은 쪽 두 번이면 이분법"]
+    Done{"수렴?"}
+    Prior --> Probe --> Done
+    Done -->|아니오| Step --> Probe
+  end
+
+  subgraph Large["큰 사진 — core/search-large.ts"]
+    direction TB
+    Mosaic["모자이크: 세부 정도 분위로 고른<br/>원본 해상도 조각 12개 (384px)"]
+    MSearch["모자이크로 품질 탐색"]
+    Full["전체 1회 인코딩"]
+    Guard{"전체 SSIM ≥ 목표?"}
+    Bump["품질 올려 다시<br/>(최대 2번)"]
+    Mosaic --> MSearch --> Full --> Guard
+    Guard -->|"모자람"| Bump --> Full
+  end
+
+  Big -->|아니오| Prior
+  Big -->|예| Mosaic
+  Done -->|"예<br/>평균 2.4~4.2번"| Best
+  Guard -->|"충족"| Best
+
+  Best["목표 이상 중 가장 작은 결과 하나만 보관"] --> Keep{"원본보다 큼?<br/>같은 형식 · 크기 안 줄임"}
+  Keep -->|예| Strip["메타데이터 지운 원본<br/>GPS 제거 · 방향 태그만"]
+  Keep -->|아니오| Out["결과"]
+  Strip --> Out
+  Out -.- Note1["실측: 50MP 57.9초 → 12.7초<br/>큰 사진 18/18 목표 충족 · 크기 손해 평균 1.9%"]

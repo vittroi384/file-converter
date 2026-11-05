@@ -1,0 +1,27 @@
+%% 알림 흐름: 감지 → 판단 → 전달. 단계별 장애 대응은 docs/architecture.md 표에.
+flowchart TB
+  subgraph Detect["① 감지"]
+    direction LR
+    APIc["API 카운터<br/>시작 때 0으로 만들어 둠"]
+    Up["up{job=api}<br/>긁기 성공 여부"]
+  end
+  VM[("VictoriaMetrics")]
+  Judge["② 판단 · vmalert 30초마다 · 규칙 11개<br/>ApiDown · 오류 예산 빠른 소진 · 사이트 점검 실패 (critical)<br/>오류 예산 느린 소진<br/>성공률 낮음 · 변환 느려짐<br/>브라우저 오류 급증 · 통계 거부 급증<br/>첫 화면 느림 · 로그 저장 실패<br/>방문 끊김 (info)"]
+  subgraph Deliver["③ 전달 · Alertmanager"]
+    direction LR
+    Group["같은 알림 묶기<br/>repeatHours마다 다시"]
+    Quiet{"방해 금지 시간?<br/>critical은 예외"}
+    Group --> Quiet
+  end
+  Ch["텔레그램 · 디스코드 · 이메일 · 웹훅"]
+  Admin["관리자 화면<br/>기준값 · 채널 · 1시간 조용히 · 테스트"]
+
+  APIc --> VM
+  Up --> VM
+  VM --> Judge
+  Judge --> Group
+  Quiet -->|보냄| Ch
+  Admin -.->|"검증 → 파일 쓰기 → reload<br/>실패하면 이전 설정 복구"| Judge
+  Admin -.->|"채널 · silence"| Deliver
+  Watch["Watchdog (늘 울림)"] -.-> Judge
+  Group -.->|"Watchdog만 · 방해 금지 무관 · 1분마다"| Ext["외부 생존 신호 서비스<br/>끊기면 바깥에서 알림"]

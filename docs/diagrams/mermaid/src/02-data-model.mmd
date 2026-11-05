@@ -1,0 +1,106 @@
+%% 데이터 모델(ERD 표기). 관계형 DB는 없다: 파일 내용은 저장하지 않고, 서버가 갖는 건
+%% ① 브라우저가 보낸 익명 이벤트 → 지표 시계열(VictoriaMetrics) ② 오류 로그(VictoriaLogs) ③ 알림 설정 JSON·YAML 파일.
+erDiagram
+  TELEMETRY_BATCH ||--|{ TELEMETRY_EVENT : "events (1~50)"
+  TELEMETRY_BATCH {
+    int v "1 (스키마 버전)"
+  }
+  TELEMETRY_EVENT {
+    enum t "conv | vital | err | pv"
+  }
+  TELEMETRY_EVENT ||--o| CONVERSION_EVENT : "t=conv"
+  TELEMETRY_EVENT ||--o| VITAL_EVENT : "t=vital"
+  TELEMETRY_EVENT ||--o| ERROR_EVENT : "t=err"
+  TELEMETRY_EVENT ||--o| PAGEVIEW_EVENT : "t=pv"
+  CONVERSION_EVENT {
+    enum op "11종"
+    enum from "형식"
+    enum to "형식"
+    bool ok
+    number ms
+    int inBytes
+    int outBytes "선택"
+    enum err "선택, 오류 코드"
+    int files "1~1000"
+  }
+  VITAL_EVENT {
+    enum name "LCP INP CLS FCP TTFB"
+    number value
+    enum rating
+  }
+  ERROR_EVENT {
+    enum where
+    enum code
+    string msg "경로·이름·메일·URL 지운 300자"
+  }
+  PAGEVIEW_EVENT {
+    enum path "/ /admin landing other"
+    enum locale "10개 언어"
+    enum ref "direct internal chatgpt ... 15종"
+  }
+
+  CONVERSION_EVENT }o--|| SERIES_CONVERSIONS : "inc"
+  CONVERSION_EVENT }o--|| SERIES_DURATION : "observe"
+  PAGEVIEW_EVENT }o--|| SERIES_PAGEVIEWS : "inc"
+  PAGEVIEW_EVENT }o--o| SERIES_REFERRALS : "ref != internal"
+  ERROR_EVENT }o--|| LOG_ENTRY : "push"
+  CRAWL_HIT }o--|| SERIES_CRAWLS : "inc"
+
+  SERIES_CONVERSIONS {
+    counter fc_conversions_total
+    label op_from_to_result_err
+    label browser_device
+  }
+  SERIES_DURATION {
+    histogram fc_conversion_duration_seconds
+    label op_device
+  }
+  SERIES_PAGEVIEWS {
+    counter fc_page_views_total
+    label path_device_browser_locale
+  }
+  SERIES_REFERRALS {
+    counter fc_referrals_total
+    label source_path_locale
+  }
+  SERIES_CRAWLS {
+    counter fc_crawler_hits_total
+    label bot_kind
+  }
+  CRAWL_HIT {
+    header x_crawl_ua "nginx mirror"
+    header x_crawl_path
+  }
+  LOG_ENTRY {
+    string _msg
+    enum level
+    enum source "client api"
+    enum where_code_browser_device
+  }
+
+  ALERT_SETTINGS ||--|{ RULE_SETTING : "rules (11)"
+  ALERT_SETTINGS ||--|| CHANNELS : "channels"
+  ALERT_SETTINGS {
+    bool quietHours_enabled
+    string quietHours_start_end "HH:MM"
+    number repeatHours "1~72"
+  }
+  RULE_SETTING {
+    string id "ApiDown 등"
+    bool enabled
+    number threshold
+  }
+  CHANNELS {
+    obj telegram "botToken chatId"
+    obj discord "webhookUrl"
+    obj email "smarthost from to"
+    obj webhook "url"
+  }
+  ALERT_SETTINGS ||--|| RULES_YAML : "renderRules"
+  ALERT_SETTINGS ||--|| ALERTMANAGER_YAML : "renderAlertmanager"
+  RULES_YAML {
+    file fc_rules_yml "vmalert가 읽음"
+  }
+  ALERTMANAGER_YAML {
+    file alertmanager_yml "비밀값은 화면에 가려서"
+  }

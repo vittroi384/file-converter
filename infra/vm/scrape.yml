@@ -1,0 +1,20 @@
+# VictoriaMetrics가 30초마다 긁어 갈 대상(전부 내부망)
+global:
+  scrape_interval: 30s
+scrape_configs:
+  - job_name: api
+    static_configs: [{ targets: ['api:9464'] }]
+  - job_name: ssr
+    metrics_path: /__ssr/metrics
+    static_configs: [{ targets: ['ssr:8790'] }]
+  - job_name: victoriametrics
+    static_configs: [{ targets: ['localhost:8428'] }]
+  - job_name: victorialogs
+    static_configs: [{ targets: ['victorialogs:9428'] }]
+  - job_name: vmalert
+    static_configs: [{ targets: ['vmalert:8880'] }]
+  - job_name: alertmanager
+    static_configs: [{ targets: ['alertmanager:9093'] }]
+  - job_name: grafana # 평소엔 꺼 둬서 down이 정상(관리자 화면 스위치로 켬)
+    metrics_path: /grafana/metrics
+    static_configs: [{ targets: ['grafana:3000'] }]

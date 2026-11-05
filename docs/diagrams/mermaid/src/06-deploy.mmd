@@ -1,0 +1,37 @@
+%% 배포 구성(infra/docker-compose.yml). 이미지 둘(web·ssr)은 한 Dockerfile(infra/web.Dockerfile)에서 한 번 빌드해 갈라 쓴다.
+%% 볼륨은 선 대신 상자 안에 적었다(선으로 그리면 그림 전체를 가로질렀다).
+flowchart TB
+  subgraph Build["빌드 · infra/web.Dockerfile"]
+    direction LR
+    B1["build 단계<br/>npm ci → vite build → SSR 묶음<br/>280쪽 굽기 · 사이트맵 · llms.txt · .gz"]
+    B2["ssr-deps 단계<br/>react · react-dom · 아이콘만<br/>잠금 파일과 같은 버전"]
+  end
+
+  Internet(("인터넷")) -->|"80/443 → CDN·프록시"| Web
+
+  subgraph Host["서버 한 대 · docker compose"]
+    direction TB
+    Web["web · nginx 1.29<br/>:8080 (유일한 공개 포트)<br/>볼륨 ssr-cache"]
+    subgraph App["앱"]
+      direction LR
+      SSR["ssr · node 24<br/>:8790 · 192MB"]
+      API["api · node 24 (TS 그대로)<br/>:8787 · :9464 내부 · 256MB<br/>볼륨 alerting (설정·규칙·AM 설정)"]
+    end
+    subgraph Mon["모니터링"]
+      direction LR
+      VM["victoriametrics v1.155.0<br/>127.0.0.1:8428 · 512MB<br/>볼륨 vm-data · 30초마다 api·ssr 긁기"]
+      VL["victorialogs v1.53.0<br/>256MB · 볼륨 vlogs-data"]
+      VMA["vmalert v1.155.0<br/>alerting 읽기"]
+      AM["alertmanager v0.34.2<br/>alerting 읽기 · 볼륨 am-data"]
+    end
+    Web --> SSR
+    Web --> API
+    API --> VL
+    VMA --> VM
+    VMA --> AM
+  end
+
+  B1 -->|"이미지 web"| Web
+  B1 -->|"SSR 묶음"| SSR
+  B2 -->|"node_modules"| SSR
+  Keys["비밀값: 서버의 .env<br/>관리자 비밀번호 해시 · 세션 키<br/>(저장소에는 없음)"] -.-> API
