@@ -66,7 +66,7 @@ export const ko: Dict = {
     pasted: '붙여넣은 파일을 추가했어요', done: '완료!', doneDownload: '완료! 파일을 받아 가세요', zipping: 'ZIP으로 묶는 중…',
     noActions: '이 파일로 할 수 있는 작업이 없어요.', compare: '전후 비교', fit: '맞춤', actualSize: '100%', close: '닫기', up: '위로', down: '아래로', download: '받기', remove: '빼기',
     paletteHint: '무엇을 할까요? (초성 검색 가능)', paletteEmpty: '맞는 명령이 없어요',
-    telemetryOff: '익명 사용 통계 끄기', telemetryOn: '익명 사용 통계 켜기', telemetryOffDone: '통계를 껐어요', telemetryOnDone: '통계를 켰어요', themeCycle: '테마 바꾸기 (자동·밝게·어둡게)',
+    telemetryOff: '익명 사용 통계 끄기', telemetryOn: '익명 사용 통계 켜기', telemetryOffDone: '통계를 껐어요', telemetryOnDone: '통계를 켰어요', themeCycle: '테마 바꾸기 (어둡게·밝게)',
     pages: n => `${n}쪽`, psdNote: '합성 이미지가 없는 PSD라 레이어를 직접 겹쳤어요. 레이어 효과·조정 레이어는 빠질 수 있어요.', moveUp: '위로',
     footer: '광고·회원가입·업로드 없음 · 익명 사용 통계(형식·크기·처리 시간만)', footerToggleOff: '끄기', footerToggleOn: '켜기', licenses: '오픈소스 라이선스',
   },

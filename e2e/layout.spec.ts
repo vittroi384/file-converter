@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { stubTelemetry } from './helpers.ts';
+import { stubTelemetry, setScheme } from './helpers.ts';
 
 // 서비스 워커를 거친 요청은 WebKit에서 가로챌 수 없다 → 오프라인 시험(pwa.spec) 말고는 막고 돌린다
 test.use({ serviceWorkers: 'block' });
@@ -42,7 +42,7 @@ for (const scheme of ['light', 'dark'] as const) {
   for (const w of WIDTHS) {
     test(`${scheme} ${w}px`, async ({ page }) => {
       await stubTelemetry(page);
-      await page.emulateMedia({ colorScheme: scheme });
+      await setScheme(page, scheme);
       await page.setViewportSize({ width: w, height: w < 800 ? 800 : 900 });
       // 전체 페이지 이어 붙이기는 고정 헤더가 중간에 끼어 보여서, 화면 크기 그대로 찍고 애니메이션이 끝나길 기다린다
       const shot = async (n: string) => { await page.waitForTimeout(400); await page.screenshot({ path: `test-results/layout/${scheme}-${w}-${n}.png` }); };

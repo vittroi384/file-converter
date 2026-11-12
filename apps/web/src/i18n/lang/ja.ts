@@ -31,7 +31,7 @@ export const dict: Dict = {
     processing: '処理中…', tries: (q, n) => `画質 ${q}・${n}回試行`, tooLarge: (need, limit) => `約${need}必要ですが、この端末の上限は約${limit}です。小さいサイズを選ぶか、パソコンで開いてください。`, keptOriginal: 'すでに十分小さいため元のまま', color444: '色の境界を保つため色を間引かずに保存(4:4:4)', colorWarn: 'WebPでは色付き文字や細い色線がにじむことがあります。AVIFかPNGがおすすめです', filesN: n => `${n}ファイル`, notForThis: 'この作業には使えません',
     skipped: n => `この作業に合わない${n}件はスキップします。`, skippedUnsupported: n => `未対応のファイル${n}件をスキップしました`, pasted: '貼り付けたファイルを追加しました', done: '完了!', doneDownload: '完了!ファイルをダウンロードしてください', zipping: 'ZIPを作成中…',
     noActions: 'このファイルでできる作業はありません。', compare: '比較', fit: '全体表示', actualSize: '100%', close: '閉じる', up: '上へ', down: '下へ', download: 'ダウンロード', remove: '削除',
-    paletteHint: '何をしますか?', paletteEmpty: '一致するコマンドがありません', telemetryOff: '匿名統計をオフ', telemetryOn: '匿名統計をオン', telemetryOffDone: '統計をオフにしました', telemetryOnDone: '統計をオンにしました', themeCycle: 'テーマ: 自動・ライト・ダーク',
+    paletteHint: '何をしますか?', paletteEmpty: '一致するコマンドがありません', telemetryOff: '匿名統計をオフ', telemetryOn: '匿名統計をオン', telemetryOffDone: '統計をオフにしました', telemetryOnDone: '統計をオンにしました', themeCycle: 'テーマ: ダーク・ライト',
     pages: n => `${n}ページ`, psdNote: '合成画像のないPSDのため、レイヤーをここで重ねました。レイヤー効果は失われることがあります。', moveUp: '上へ',
     footer: '広告・登録・アップロードなし・匿名の利用統計(形式・サイズ・処理時間のみ)', footerToggleOff: 'オフにする', footerToggleOn: 'オンにする', licenses: 'オープンソースライセンス',
   },

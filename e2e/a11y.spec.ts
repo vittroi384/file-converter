@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { stubTelemetry } from './helpers.ts';
+import { stubTelemetry, setScheme } from './helpers.ts';
 
 // 접근성(WCAG 2.2 AA) 자동 검사: axe가 찾은 위반 중 serious·critical이 하나라도 있으면 실패.
 // 색 대비는 엔진마다 같으니 Edge에서만 돈다. 스크롤 연출은 중간 상태(흐려지는 중)를 잡으면 매번 결과가 달라서
@@ -34,7 +34,7 @@ test.beforeEach(async ({ page }) => { await stubTelemetry(page); });
 
 for (const scheme of ['light', 'dark'] as const) {
   test.describe(`${scheme} 화면`, () => {
-    test.use({ colorScheme: scheme });
+    test.beforeEach(async ({ page }) => { await setScheme(page, scheme); });
 
     for (const path of ['/ko', '/', '/ko/heic-to-jpg', '/ja/avif-to-png']) {
       test(`페이지 ${path}`, async ({ page }) => {
@@ -111,7 +111,7 @@ test.describe('관리자', () => {
 
   for (const scheme of ['light', 'dark'] as const) {
     test(`${scheme} 모든 탭`, async ({ page }) => {
-      await page.emulateMedia({ colorScheme: scheme });
+      await setScheme(page, scheme);
       await page.goto('/admin');
       await expect(page.getByLabel('비밀번호')).toBeVisible();
       await axe(page, '로그인');

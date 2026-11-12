@@ -1,14 +1,11 @@
 /* 관리자 화면 전용(이 파일은 관리자 묶음에만 들어간다) */
 .admin {
-  /* 차트 색: 검증된 8색(라이트). 색만으로 구분하지 않도록 이름·값을 늘 글자로 함께 표시 */
-  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
-  /* 상태 글자색: 바탕(#fffdf8·#f6f2ea) 대비 4.5:1 이상 */
-  --good: #1d7a33; --warn: #8a6100; --bad: #d03b3b;
+  /* 차트 색: 검증된 8색(어두운 화면이 기본). 색만으로 구분하지 않도록 이름·값을 늘 글자로 함께 표시 */
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  --good: #0ca30c; --warn: #fab219; --bad: #ff7a6b;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .admin { --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767; --good: #0ca30c; --warn: #fab219; --bad: #ff7a6b; }
-}
-:root[data-theme='dark'] .admin { --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767; --good: #0ca30c; --warn: #fab219; --bad: #ff7a6b; }
+/* 밝은 화면: 상태 글자색은 바탕(#ffffff·#f7f8f8) 대비 4.5:1 이상 */
+:root[data-theme='light'] .admin { --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948; --good: #1d7a33; --warn: #8a6100; --bad: #d03b3b; }
 
 .admin-main { max-width: 1280px; }
 .admin-panel { display: grid; gap: 14px; }

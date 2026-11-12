@@ -66,7 +66,7 @@ export const en: Dict = {
     pasted: 'Pasted file added', done: 'Done!', doneDownload: 'Done — download your file', zipping: 'Zipping…',
     noActions: 'There is nothing to do with these files.', compare: 'Compare', fit: 'Fit', actualSize: '100%', close: 'Close', up: 'Move up', down: 'Move down', download: 'Download', remove: 'Remove',
     paletteHint: 'What do you want to do?', paletteEmpty: 'No matching command',
-    telemetryOff: 'Turn off anonymous stats', telemetryOn: 'Turn on anonymous stats', telemetryOffDone: 'Stats turned off', telemetryOnDone: 'Stats turned on', themeCycle: 'Theme: auto · light · dark',
+    telemetryOff: 'Turn off anonymous stats', telemetryOn: 'Turn on anonymous stats', telemetryOffDone: 'Stats turned off', telemetryOnDone: 'Stats turned on', themeCycle: 'Theme: dark · light',
     pages: n => `${n} pages`, psdNote: 'This PSD has no merged image, so layers were combined here. Layer effects may be missing.', moveUp: 'Move up',
     footer: 'No ads · no sign-up · no upload · anonymous usage stats (format, size and time only)', footerToggleOff: 'turn off', footerToggleOn: 'turn on', licenses: 'Open-source licenses',
   },

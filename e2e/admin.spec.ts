@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { RULES } from '../apps/api/src/alerting.ts';
+import { setScheme } from './helpers.ts';
 
 // docker compose 스택(8080)에 붙어서 돈다. ADMIN_PW가 없으면 건너뜀.
 const PW = process.env.ADMIN_PW;
@@ -83,7 +84,7 @@ test('알림: 규칙 끄고 저장 → 적용, 비밀값은 가려짐, 다시 �
 for (const scheme of ['light', 'dark'] as const) {
   for (const w of [375, 1440]) {
     test(`관리자 화면 ${scheme} ${w}px`, async ({ page }) => {
-      await page.emulateMedia({ colorScheme: scheme });
+      await setScheme(page, scheme);
       await page.setViewportSize({ width: w, height: 900 });
       await login(page);
       await expect(page.locator('.kpi b').first()).not.toHaveText('–', { timeout: 15_000 });

@@ -15,3 +15,15 @@ export async function stubTelemetry(page: Page, sink?: string[]) {
   });
   await page.route('**/api/t', async r => { sink?.push(r.request().postData() ?? ''); await r.fulfill({ status: 204 }); });
 }
+
+// 밝은/어두운 화면 고르기. 사이트는 기기 설정을 따르지 않고(어두운 화면이 기본) 저장값 fc:theme만 본다.
+// 앱이 뜨기 전에 <html data-theme>까지 미리 붙여 첫 그림부터 그 화면이 되게 한다.
+export async function setScheme(page: Page, scheme: 'light' | 'dark') {
+  await page.addInitScript(s => {
+    try { localStorage.setItem('fc:theme', s); } catch { /* 저장소 막힘 */ }
+    if (s !== 'light') return;
+    const apply = () => { document.documentElement.dataset.theme = 'light'; };
+    if (document.documentElement) apply();
+    else new MutationObserver((_, o) => { if (document.documentElement) { apply(); o.disconnect(); } }).observe(document, { childList: true });
+  }, scheme);
+}

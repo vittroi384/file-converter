@@ -14,15 +14,18 @@ const CommandPalette = lazy(() => import('./CommandPalette.tsx').then(m => ({ de
 
 const Admin = lazy(() => import('../admin/Admin.tsx'));
 
-type Theme = 'system' | 'light' | 'dark';
-const THEME_ICON: Record<Theme, IconName> = { system: 'auto', light: 'sun', dark: 'moon' };
+type Theme = 'dark' | 'light';
+const THEME_ICON: Record<Theme, IconName> = { dark: 'moon', light: 'sun' };
 
 export function App({ data, t }: { data: PageData; t: Dict }) {
-  const [theme, setTheme] = useState<Theme>('system');
-  useEffect(() => { try { setTheme((localStorage.getItem('fc:theme') as Theme) || 'system'); } catch { /* 저장소 막힘 */ } }, []);
+  // 기본은 어두운 화면. 밝은 화면을 골랐던 사람만 저장값으로 되돌린다(예전 값 'system'·'dark'는 어두운 화면)
+  const [theme, setTheme] = useState<Theme>('dark');
+  useEffect(() => {
+    try { if (localStorage.getItem('fc:theme') === 'light') { document.documentElement.dataset.theme = 'light'; setTheme('light'); } } catch { /* 저장소 막힘 */ }
+  }, []);
   const cycleTheme = () => setTheme(cur => {
-    const next: Theme = cur === 'system' ? 'light' : cur === 'light' ? 'dark' : 'system';
-    if (next === 'system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = next;
+    const next: Theme = cur === 'dark' ? 'light' : 'dark';
+    if (next === 'dark') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = next;
     try { localStorage.setItem('fc:theme', next); } catch { /* 무시 */ }
     return next;
   });

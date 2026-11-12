@@ -31,7 +31,7 @@ export const dict: Dict = {
     processing: '处理中…', tries: (q, n) => `画质 ${q} · 尝试 ${n} 次`, tooLarge: (need, limit) => `需要约 ${need}，此设备上限约 ${limit}。请选择更小的尺寸，或在电脑上打开。`, keptOriginal: '已经足够小，保留原文件', color444: '为保持颜色边缘清晰，未做色度抽样(4:4:4)', colorWarn: 'WebP 可能使彩色文字和细彩色线条模糊，建议使用 AVIF 或 PNG', filesN: n => `${n} 个文件`, notForThis: '不适用于此工具',
     skipped: n => `${n} 个文件不适用于此工具，将跳过。`, skippedUnsupported: n => `已跳过 ${n} 个不支持的文件`, pasted: '已添加粘贴的文件', done: '完成！', doneDownload: '完成！请下载文件', zipping: '正在打包 ZIP…',
     noActions: '这些文件没有可执行的操作。', compare: '对比', fit: '适应', actualSize: '100%', close: '关闭', up: '上移', down: '下移', download: '下载', remove: '移除',
-    paletteHint: '要做什么？', paletteEmpty: '没有匹配的命令', telemetryOff: '关闭匿名统计', telemetryOn: '开启匿名统计', telemetryOffDone: '已关闭统计', telemetryOnDone: '已开启统计', themeCycle: '主题：自动 · 浅色 · 深色',
+    paletteHint: '要做什么？', paletteEmpty: '没有匹配的命令', telemetryOff: '关闭匿名统计', telemetryOn: '开启匿名统计', telemetryOffDone: '已关闭统计', telemetryOnDone: '已开启统计', themeCycle: '主题：深色 · 浅色',
     pages: n => `${n} 页`, psdNote: '此 PSD 没有合成图像，已在此合并图层。图层效果可能缺失。', moveUp: '上移',
     footer: '无广告 · 无需注册 · 不上传 · 匿名使用统计（仅格式、大小和耗时）', footerToggleOff: '关闭', footerToggleOn: '开启', licenses: '开源许可',
   },
