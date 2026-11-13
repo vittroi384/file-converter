@@ -1,6 +1,6 @@
 # 배포
 
-운영 서버는 OCI 무료 VM 한 대(Ubuntu 24.04, 메모리 2GB 이상 권장 — 컨테이너 메모리 상한 합이 약 1.7GB이고 Grafana(13.x)만 최대 512MB)이고, docker compose로 돌린다(2026-11-05부터 운영 중, https://localconvert.duckdns.org). web(nginx)은 8080 하나만 받고, 그 앞단의 리버스 프록시가 Let's Encrypt 인증서로 HTTPS를 끝내고 `127.0.0.1:8080`으로 넘긴다. 도메인은 DuckDNS 하위 도메인이다.
+운영 서버는 OCI 무료 VM 한 대(Ubuntu 24.04, 메모리 2GB 이상 권장 — 컨테이너 메모리 상한 합이 약 1.7GB이고 Grafana(13.x)만 최대 512MB)이고, docker compose로 돌린다(2026-11-13부터 운영 중, https://convert.getqrmaker.com). 같은 서버에 다른 서비스가 80·443·8080을 쓰고 있어 web(nginx)은 8081로 연다(`WEB_PORT=8081`). HTTPS는 Cloudflare가 끝내고, 같은 서버의 다른 프로젝트(QR 사이트)가 돌리는 Caddy가 이 주소 이름으로 온 요청을 `:8081`로 넘긴다.
 
 ## 처음 한 번
 
@@ -26,10 +26,10 @@ FORCE=1 ./infra/deploy.sh
 ```
 
 HTTPS:
-- DNS: DuckDNS 하위 도메인을 서버 공인 IP로.
-- 같은 서버의 리버스 프록시(예: Caddy `reverse_proxy 127.0.0.1:8080`)가 Let's Encrypt 인증서를 받고 갱신하며 HTTPS를 끝낸다. 인증서·키 파일은 프로젝트 폴더 밖에 둔다.
-- 서버 방화벽(OCI 보안 목록 + ufw)은 80·443만 연다(80은 인증서 발급 확인과 HTTPS 이동용). 8080은 바깥에 열지 않는다.
-- api의 신뢰 프록시 수(`TRUST_PROXY_HOPS`)는 앞단 프록시 + nginx = 2.
+- DNS: Cloudflare에 `convert` 레코드(프록시 켬). 원본 포트를 바꾸는 Origin Rule이 이 주소 이름에도 걸려야 한다.
+- 같은 서버의 Caddy(QR 사이트 compose)에 `http://convert.getqrmaker.com { reverse_proxy 172.17.0.1:8081 }` 한 칸. 172.17.0.1은 그 컨테이너에서 본 호스트(docker0)다. 인증서는 Cloudflare가 맡아 서버에는 없다.
+- 8081은 바깥에 열지 않는다(OCI 보안 목록에 없음). 바깥에서 닿는 길은 Cloudflare → Caddy뿐이다.
+- api의 신뢰 프록시 수(`TRUST_PROXY_HOPS`)는 Cloudflare + Caddy + nginx = 3.
 
 ## 평소 배포
 
@@ -39,11 +39,11 @@ cd ~/file-converter && ./infra/deploy.sh
 
 하는 일: `origin/main` 받기 → 빌드 번호(`커밋-월일시분`) 붙여 빌드 → 교체(`--wait`로 건강 확인) → 첫 화면·CSP·SSR·API 점검 → 실패하면 이전 이미지와 커밋으로 되돌림. 관리자 화면 '서버' 탭의 '배포'와 그래프 점선에 빌드 번호가 찍힌다.
 
-콘텐츠(안내 페이지 등)를 바꿨으면 검색엔진에 알린다: `node tools/indexnow.mjs https://localconvert.duckdns.org` (먼저 `--dry`로 확인 가능).
+콘텐츠(안내 페이지 등)를 바꿨으면 검색엔진에 알린다: `node tools/indexnow.mjs https://convert.getqrmaker.com` (먼저 `--dry`로 확인 가능).
 
 ## 처음 켠 뒤 관리자 화면에서
 
-1. `https://localconvert.duckdns.org/admin` 로그인.
+1. `https://convert.getqrmaker.com/admin` 로그인.
 2. 알림 → 채널(텔레그램·디스코드·이메일·웹훅) 하나 이상 켜고 '테스트 알림 보내기'.
 3. 알림 → **외부 생존 신호**: healthchecks.io 등에서 체크를 만들고(주기 1분, 유예 5분) 받은 주소를 넣는다. 서버가 통째로 꺼지면 그쪽이 알려 준다.
 4. 서버 탭 → '사이트 점검'이 모두 정상인지.

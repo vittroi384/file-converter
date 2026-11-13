@@ -32,4 +32,4 @@
 ## E. 개발 과정
 1. **CI**: 깃헙 액션에서 `npm run check` + Playwright(크롬·파이어폭스·웹킷). 지금은 이 PC의 Edge 하나로만 확인했다 — **사파리(아이폰)는 미확인**이 가장 큰 공백.
 2. **시각 회귀 테스트**: 이번에 스크린샷을 직접 봐서 잡은 문제(카드 5+1, 글자 쪼개짐, 점 몰림)를 기준 이미지 비교로 자동화.
-3. **배포**: 완료. OCI VM에서 Docker Compose로 운영 중(2026-11-05\~, 변환은 브라우저에서 하므로 서버 부하는 작다). nginx 앞단 리버스 프록시가 Let's Encrypt로 HTTPS(DuckDNS 도메인), SECURE_COOKIE=true — [deploy.md](deploy.md).
+3. **배포**: 완료. OCI VM에서 Docker Compose로 운영 중(2026-11-13\~, 변환은 브라우저에서 하므로 서버 부하는 작다). HTTPS는 Cloudflare, 같은 서버의 Caddy가 nginx(8081)로 넘김, SECURE_COOKIE=true — [deploy.md](deploy.md).

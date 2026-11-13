@@ -5,7 +5,7 @@
   "editable": false,
   "graphTooltip": 1,
   "schemaVersion": 41,
-  "version": 1,
+  "version": 2,
   "tags": [
     "localconvert"
   ],
@@ -139,13 +139,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -216,13 +216,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -293,13 +293,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -370,13 +370,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -467,13 +467,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -564,13 +564,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -585,7 +585,11 @@
         "x": 0,
         "y": 3
       },
-      "panels": []
+      "panels": [],
+      "fieldConfig": {
+        "defaults": {}
+      },
+      "options": {}
     },
     {
       "id": 8,
@@ -680,11 +684,11 @@
           "custom": {
             "drawStyle": "line",
             "lineWidth": 2,
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 14,
+            "gradientMode": "opacity",
             "showPoints": "never",
             "spanNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "stacking": {
               "mode": "none",
               "group": "A"
@@ -806,7 +810,11 @@
         "x": 0,
         "y": 13
       },
-      "panels": []
+      "panels": [],
+      "fieldConfig": {
+        "defaults": {}
+      },
+      "options": {}
     },
     {
       "id": 10,
@@ -873,7 +881,7 @@
             }
           ],
           "custom": {
-            "fillOpacity": 40,
+            "fillOpacity": 70,
             "lineWidth": 0
           }
         },
@@ -954,7 +962,7 @@
       },
       "options": {
         "showValue": "never",
-        "rowHeight": 0.7,
+        "rowHeight": 0.75,
         "mergeValues": true,
         "alignValue": "left",
         "legend": {
@@ -1012,11 +1020,11 @@
           "custom": {
             "drawStyle": "line",
             "lineWidth": 2,
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 14,
+            "gradientMode": "opacity",
             "showPoints": "never",
             "spanNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "stacking": {
               "mode": "none",
               "group": "A"
@@ -1171,7 +1179,11 @@
         "x": 0,
         "y": 22
       },
-      "panels": []
+      "panels": [],
+      "fieldConfig": {
+        "defaults": {}
+      },
+      "options": {}
     },
     {
       "id": 13,
@@ -1238,7 +1250,7 @@
             }
           ],
           "custom": {
-            "fillOpacity": 40,
+            "fillOpacity": 70,
             "lineWidth": 0
           }
         },
@@ -1331,7 +1343,7 @@
       },
       "options": {
         "showValue": "never",
-        "rowHeight": 0.7,
+        "rowHeight": 0.75,
         "mergeValues": true,
         "alignValue": "left",
         "legend": {
@@ -1391,7 +1403,7 @@
           "custom": {
             "drawStyle": "bars",
             "lineWidth": 0,
-            "fillOpacity": 85,
+            "fillOpacity": 80,
             "gradientMode": "none",
             "showPoints": "never",
             "spanNulls": false,
@@ -1406,7 +1418,8 @@
             },
             "axisBorderShow": false,
             "barAlignment": 0,
-            "axisGridShow": true
+            "axisGridShow": true,
+            "barWidthFactor": 0.7
           }
         },
         "overrides": [
@@ -1542,7 +1555,7 @@
           "custom": {
             "drawStyle": "bars",
             "lineWidth": 0,
-            "fillOpacity": 85,
+            "fillOpacity": 80,
             "gradientMode": "none",
             "showPoints": "never",
             "spanNulls": false,
@@ -1557,7 +1570,8 @@
             },
             "axisBorderShow": false,
             "barAlignment": 0,
-            "axisGridShow": true
+            "axisGridShow": true,
+            "barWidthFactor": 0.7
           }
         },
         "overrides": [

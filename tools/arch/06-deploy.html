@@ -8,11 +8,11 @@
 </style></head>
 <body><div class="page">
   <h1>LocalConvert 배포 구성</h1>
-  <p class="sub">서버 한 대 · Docker Compose 서비스 7개 · 앞단 리버스 프록시가 Let's Encrypt로 HTTPS · web(nginx)은 8080 하나</p>
+  <p class="sub">서버 한 대 · Docker Compose 서비스 7개 · HTTPS는 Cloudflare · web(nginx)은 8081 하나</p>
 
-  <div class="card net"><span class="role">앞단 리버스 프록시</span><h3>HTTPS 종단 · Let's Encrypt</h3>
-    <p>DuckDNS 도메인 · 인증서 자동 갱신 · 127.0.0.1:8080으로 넘김 · 서버 방화벽은 80·443만 열고 8080은 바깥에 안 엶</p></div>
-  <div class="arrow v"><span>:8080 (리버스 프록시에서만)</span></div>
+  <div class="card net"><span class="role">앞단</span><h3>Cloudflare(HTTPS) → 같은 서버의 Caddy</h3>
+    <p>Cloudflare가 인증서와 HTTPS를 맡음 · Caddy가 주소 이름을 보고 :8081로 넘김 · 8081은 바깥에 안 엶</p></div>
+  <div class="arrow v"><span>:8081 (Caddy에서만)</span></div>
 
   <div class="zone"><span class="zone-title">서버 한 대 · docker compose (file-converter)</span>
     <div class="row c4">

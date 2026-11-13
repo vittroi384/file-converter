@@ -5,7 +5,7 @@
   "editable": false,
   "graphTooltip": 1,
   "schemaVersion": 41,
-  "version": 1,
+  "version": 2,
   "tags": [
     "localconvert"
   ],
@@ -142,13 +142,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -218,13 +218,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -295,13 +295,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -371,13 +371,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -447,13 +447,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -524,13 +524,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -545,7 +545,11 @@
         "x": 0,
         "y": 3
       },
-      "panels": []
+      "panels": [],
+      "fieldConfig": {
+        "defaults": {}
+      },
+      "options": {}
     },
     {
       "id": 8,
@@ -581,7 +585,7 @@
           "unit": "ms",
           "color": {
             "mode": "fixed",
-            "fixedColor": "#3987e5"
+            "fixedColor": "#828fff"
           },
           "thresholds": {
             "mode": "absolute",
@@ -603,11 +607,11 @@
           "custom": {
             "drawStyle": "line",
             "lineWidth": 2,
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 14,
+            "gradientMode": "opacity",
             "showPoints": "never",
             "spanNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "stacking": {
               "mode": "none",
               "group": "A"
@@ -671,7 +675,7 @@
           "unit": "ms",
           "color": {
             "mode": "fixed",
-            "fixedColor": "#3987e5"
+            "fixedColor": "#828fff"
           },
           "thresholds": {
             "mode": "absolute",
@@ -693,11 +697,11 @@
           "custom": {
             "drawStyle": "line",
             "lineWidth": 2,
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 14,
+            "gradientMode": "opacity",
             "showPoints": "never",
             "spanNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "stacking": {
               "mode": "none",
               "group": "A"
@@ -762,7 +766,7 @@
           "decimals": 3,
           "color": {
             "mode": "fixed",
-            "fixedColor": "#3987e5"
+            "fixedColor": "#828fff"
           },
           "thresholds": {
             "mode": "absolute",
@@ -784,11 +788,11 @@
           "custom": {
             "drawStyle": "line",
             "lineWidth": 2,
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 14,
+            "gradientMode": "opacity",
             "showPoints": "never",
             "spanNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "stacking": {
               "mode": "none",
               "group": "A"
@@ -852,7 +856,7 @@
           "unit": "ms",
           "color": {
             "mode": "fixed",
-            "fixedColor": "#3987e5"
+            "fixedColor": "#828fff"
           },
           "thresholds": {
             "mode": "absolute",
@@ -874,11 +878,11 @@
           "custom": {
             "drawStyle": "line",
             "lineWidth": 2,
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 14,
+            "gradientMode": "opacity",
             "showPoints": "never",
             "spanNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "stacking": {
               "mode": "none",
               "group": "A"
@@ -942,7 +946,7 @@
           "unit": "ms",
           "color": {
             "mode": "fixed",
-            "fixedColor": "#3987e5"
+            "fixedColor": "#828fff"
           },
           "thresholds": {
             "mode": "absolute",
@@ -964,11 +968,11 @@
           "custom": {
             "drawStyle": "line",
             "lineWidth": 2,
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 14,
+            "gradientMode": "opacity",
             "showPoints": "never",
             "spanNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "stacking": {
               "mode": "none",
               "group": "A"
@@ -1009,7 +1013,11 @@
         "x": 0,
         "y": 18
       },
-      "panels": []
+      "panels": [],
+      "fieldConfig": {
+        "defaults": {}
+      },
+      "options": {}
     },
     {
       "id": 14,
@@ -1071,12 +1079,12 @@
       },
       "options": {
         "orientation": "horizontal",
-        "displayMode": "basic",
+        "displayMode": "gradient",
         "showUnfilled": true,
         "valueMode": "text",
         "namePlacement": "left",
         "sizing": "manual",
-        "minVizHeight": 14,
+        "minVizHeight": 12,
         "maxVizHeight": 18,
         "minVizWidth": 8,
         "reduceOptions": {
@@ -1128,7 +1136,7 @@
           "unit": "short",
           "color": {
             "mode": "fixed",
-            "fixedColor": "#3987e5"
+            "fixedColor": "#828fff"
           },
           "thresholds": {
             "mode": "absolute",
@@ -1142,11 +1150,11 @@
           "custom": {
             "drawStyle": "line",
             "lineWidth": 2,
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 14,
+            "gradientMode": "opacity",
             "showPoints": "never",
             "spanNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "stacking": {
               "mode": "none",
               "group": "A"

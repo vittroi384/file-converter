@@ -25,7 +25,7 @@
   </div>
 
   <div class="arrow v"><span>HTTPS · 페이지·코드는 처음 한 번 · 이후엔 익명 숫자만</span></div>
-  <div class="card net"><span class="role">앞단 리버스 프록시</span><h3>HTTPS 종단</h3><p>Let's Encrypt 인증서 · DuckDNS 도메인 · web(nginx):8080으로</p></div>
+  <div class="card net"><span class="role">앞단</span><h3>Cloudflare → Caddy</h3><p>HTTPS는 Cloudflare · 같은 서버의 Caddy가 web(nginx):8081로</p></div>
   <div class="arrow v"><span>:8080 (리버스 프록시에서만)</span></div>
 
   <div class="zone"><span class="zone-title">서버 한 대 · Docker Compose</span>

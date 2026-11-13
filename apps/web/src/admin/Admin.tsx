@@ -49,7 +49,7 @@ export default function Admin({ onTheme, themeIcon }: { onTheme(): void; themeIc
   return (
     <div className="admin">
       <header className="header">
-        <a className="brand" href="/"><span className="brand-mark"><Icon name="refresh" size={17} /></span>관리자</a>
+        <a className="brand" href="/"><span className="mark" aria-hidden="true"><span /><span /></span><span className="brand-name">Local<b>Convert</b></span><span className="brand-tag">관리자</span></a>
         <nav className="admin-tabs" role="tablist" aria-label="관리자 화면" onKeyDown={e => {
           // 탭 목록 키보드: 좌우 화살표·Home·End로 옮기고 바로 연다
           const i = TABS.findIndex(([k]) => k === tab);
@@ -89,7 +89,9 @@ function Login({ onDone }: { onDone(): void }) {
         e.preventDefault(); setBusy(true); setErr('');
         try { await api.login(pw); onDone(); } catch (x) { setErr((x as Error).message); } finally { setBusy(false); }
       }}>
+        <span className="mark" aria-hidden="true"><span /><span /></span>
         <h1>관리자</h1>
+        <p className="muted login-sub">LocalConvert 운영 화면</p>
         <label className="field-label" htmlFor="pw">비밀번호</label>
         <input id="pw" className="text-input" type="password" autoComplete="current-password" value={pw} onChange={e => setPw(e.target.value)} autoFocus />
         {err && <div className="note err" role="alert">{err}</div>}
@@ -314,7 +316,7 @@ function GrafanaCard({ onError }: { onError(e: unknown): void }) {
 }
 
 function Kpi({ label, value, tone }: { label: string; value: string; tone?: Status }) {
-  return <div className={`kpi panel${tone ? ' ' + tone : ''}`}><span>{label}</span><b>{value}</b></div>;
+  return <div className={`kpi panel${tone ? ' ' + tone : ''}`}><span>{tone && <i aria-hidden="true" />}{label}</span><b>{value}</b></div>;
 }
 function Card({ title, sub, children }: { title: string; sub?: React.ReactNode; children: React.ReactNode }) {
   return <div className="panel card"><div className="card-head"><h3>{title}</h3>{sub && <span className="muted">{sub}</span>}</div>{children}</div>;

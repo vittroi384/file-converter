@@ -10,7 +10,7 @@
 ![Oracle Cloud](https://img.shields.io/badge/Oracle%20Cloud-VM-F80000?logo=oracle&logoColor=white)
 ![CI](https://github.com/vittroi384/file-converter/actions/workflows/ci.yml/badge.svg)
 
-**라이브: <https://localconvert.duckdns.org>** (Oracle Cloud VM + DuckDNS·Let's Encrypt, 2026-11 공개)
+**라이브: <https://convert.getqrmaker.com>** (Oracle Cloud VM, HTTPS는 Cloudflare, 2026-11 공개)
 
 사진·PDF·엑셀·영상을 **서버로 보내지 않고 브라우저 탭 안(Web Worker + WebAssembly)에서** 변환하는 공개 웹서비스입니다. 광고·회원가입이 없습니다.
 서버는 페이지를 내주고 익명 숫자(형식·크기·처리 시간)만 받으며, CSP `connect-src 'self'`로 파일 바이트가 다른 서버로 나갈 경로 자체를 막았습니다. 운영자는 이 숫자로 대시보드와 알림(VictoriaMetrics·vmalert·Alertmanager)을 봅니다.
@@ -18,7 +18,7 @@
 
 ## 스크린샷
 
-> 시각 회귀 시험(`e2e/visual.spec.ts`)의 기준 화면(Edge, 움직임 줄이기 상태)에서 잘라낸 그림입니다.
+> 로컬에서 띄운 화면을 Edge로 찍은 그림입니다(움직임 줄이기 상태 = 스크롤 장면이 끝난 정지 그림).
 
 **메인** — 파일 놓기, 원본/변환 비교 슬라이더(이 사이트에서 실제로 변환한 결과)
 
@@ -32,6 +32,13 @@
   <tr>
     <td width="50%"><img src="assets/landing.png"><br><sub><b>변환별 안내 페이지</b> — 정적 사이트 생성(SSG), 10개 언어 (<code>/ko/heic-to-jpg</code>)</sub></td>
     <td width="50%" align="center"><img src="assets/mobile.png" width="180"><br><sub><b>모바일(어두운 화면)</b> — 390px</sub></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="assets/meta.png"><br><sub><b>숨은 정보 지우기</b> — 위치·기종·촬영 시각(EXIF·XMP)은 변환 때 빠지고 색 프로필(ICC)만 남음(값은 보기용 예시)</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="assets/admin.png"><br><sub><b>관리자 화면</b> — 변환·유입·성능·서버·오류 로그·알림(로컬 스택의 시험용 가상 자료)</sub></td>
+    <td width="50%"><img src="assets/grafana.png"><br><sub><b>Grafana</b> — 같은 지표를 길게 보는 대시보드 5개, 코드로 관리(시험용 가상 자료)</sub></td>
   </tr>
 </table>
 
@@ -54,7 +61,7 @@
 - **변환기 플러그인 계약**: 작업 하나 = 명세 하나(`inputs`·`outputs`·`validate`·`cost`·`timeoutMs`·`load`). 화면과 워커가 같은 검사를 두 번 부르고, 계약 테스트가 화면의 모든 선택지 조합을 검사([`docs/architecture.md`](docs/architecture.md))
 - **워커 풀 = 객체 풀 + 격벽 + 입장 제어**: 한 작업이 죽어도 그 워커만 버리고 새로, 큰 작업은 혼자 실행
 - **관계형 DB 없음**: 통계 이벤트 → Prometheus 지표(VictoriaMetrics 90일), 브라우저 오류 → VictoriaLogs(30일). 파일 이름·내용은 통계 스키마에 자리가 없고, 라벨은 허용 목록 값만
-- **단일 VM + compose**: nginx(정적·SSR 캐시·언어 이동)·SSR·API·VictoriaMetrics·VictoriaLogs·vmalert·Alertmanager, 서비스별 메모리 상한. 앞단 리버스 프록시가 Let's Encrypt로 HTTPS를 종단하고 `web:8080`만 받음([`docs/diagrams/06-deploy.png`](docs/diagrams/06-deploy.png))
+- **단일 VM + compose**: nginx(정적·SSR 캐시·언어 이동)·SSR·API·VictoriaMetrics·VictoriaLogs·vmalert·Alertmanager, 서비스별 메모리 상한. HTTPS는 Cloudflare가 끝내고 같은 서버의 Caddy가 `web`(nginx) 하나로만 넘김([`docs/diagrams/06-deploy.png`](docs/diagrams/06-deploy.png))
 
 | 그림 | 내용 |
 |---|---|

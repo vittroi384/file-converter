@@ -5,7 +5,7 @@
   "editable": false,
   "graphTooltip": 1,
   "schemaVersion": 41,
-  "version": 1,
+  "version": 2,
   "tags": [
     "localconvert"
   ],
@@ -128,13 +128,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -201,13 +201,13 @@
         },
         "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "textMode": "value",
         "wideLayout": true,
         "showPercentChange": false,
         "text": {
           "titleSize": 13,
-          "valueSize": 26
+          "valueSize": 30
         }
       }
     },
@@ -250,7 +250,7 @@
           },
           "custom": {
             "drawStyle": "bars",
-            "fillOpacity": 85,
+            "fillOpacity": 80,
             "lineWidth": 0,
             "stacking": {
               "mode": "normal",
@@ -258,7 +258,10 @@
             },
             "showPoints": "never",
             "axisSoftMin": 0,
-            "axisBorderShow": false
+            "axisBorderShow": false,
+            "barWidthFactor": 0.7,
+            "barAlignment": 0,
+            "axisGridShow": true
           }
         },
         "overrides": [
@@ -634,13 +637,13 @@
           "min": 0,
           "color": {
             "mode": "fixed",
-            "fixedColor": "#3987e5"
+            "fixedColor": "#828fff"
           },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "#3987e5",
+                "color": "#828fff",
                 "value": null
               }
             ]
@@ -771,12 +774,12 @@
       },
       "options": {
         "orientation": "horizontal",
-        "displayMode": "basic",
+        "displayMode": "gradient",
         "showUnfilled": true,
         "valueMode": "text",
         "namePlacement": "left",
         "sizing": "manual",
-        "minVizHeight": 14,
+        "minVizHeight": 12,
         "maxVizHeight": 18,
         "minVizWidth": 8,
         "reduceOptions": {
@@ -806,7 +809,11 @@
         "x": 0,
         "y": 8
       },
-      "panels": []
+      "panels": [],
+      "fieldConfig": {
+        "defaults": {}
+      },
+      "options": {}
     },
     {
       "id": 6,

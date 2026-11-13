@@ -85,8 +85,12 @@ export function LineChart({ lines, unit = '', height = 180, yMax, markers = [] }
         {lines.map((l, i) => l.points.length >= 3 ? (
           // 자료가 빈 구간(서버가 꺼져 있던 때 등)은 선을 끊는다: 이어 그리면 없던 값이 있었던 것처럼 보였다
           <g key={l.name}>{segments(l.points).map((seg, k) => (
-            <polyline key={k} fill="none" stroke={seriesVar(l.slot ?? i)} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke"
-              points={seg.map(p => `${sx(p[0])},${sy(p[1])}`).join(' ')} />
+            <g key={k}>
+              {/* 선 아래 옅은 면(계열이 둘 이하일 때만: 많으면 겹쳐 탁해진다) */}
+              {lines.length <= 2 && seg.length > 1 && <polygon className="area" fill={seriesVar(l.slot ?? i)} points={`${sx(seg[0]![0])},${sy(0)} ${seg.map(p => `${sx(p[0])},${sy(p[1])}`).join(' ')} ${sx(seg[seg.length - 1]![0])},${sy(0)}`} />}
+              <polyline fill="none" stroke={seriesVar(l.slot ?? i)} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke"
+                points={seg.map(p => `${sx(p[0])},${sy(p[1])}`).join(' ')} />
+            </g>
           ))}</g>
         ) : (
           // 점이 1~2개면 선 길이가 0이라 안 보인다(서비스 시작 직후 실제로 겪음) → 8px 점으로
@@ -122,7 +126,7 @@ export function BarList({ rows, unit = '', max }: { rows: { label: string; value
       {rows.map(r => (
         <li key={r.label} title={`${r.label}: ${fmtNum(r.value, unit)}`}>
           <span className="bar-label">{r.label}</span>
-          <span className="bar-track"><i style={{ width: `${Math.max(1.5, (r.value / m) * 100)}%`, background: seriesVar(0) }} /></span>
+          <span className="bar-track"><i style={{ width: `${Math.max(1.5, (r.value / m) * 100)}%` }} /></span>
           <span className="bar-value">{fmtNum(r.value, unit)}</span>
         </li>
       ))}

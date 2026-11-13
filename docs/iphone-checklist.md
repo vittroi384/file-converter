@@ -1,6 +1,6 @@
 # 아이폰 실기기 점검 목록
 
-Playwright의 WebKit·아이폰 화면 흉내로는 다 통과했지만, 진짜 사파리(iOS)에서만 나오는 차이가 있을 수 있다. 운영 주소(https://localconvert.duckdns.org)에서 아이폰으로 한 번씩 확인한다. 각 줄 옆에 ○/× 와 iOS 버전을 적어 주면 고친다.
+Playwright의 WebKit·아이폰 화면 흉내로는 다 통과했지만, 진짜 사파리(iOS)에서만 나오는 차이가 있을 수 있다. 운영 주소(https://convert.getqrmaker.com)에서 아이폰으로 한 번씩 확인한다. 각 줄 옆에 ○/× 와 iOS 버전을 적어 주면 고친다.
 
 | # | 해 볼 것 | 기대 |
 |---|---|---|

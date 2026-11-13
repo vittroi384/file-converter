@@ -148,3 +148,110 @@ html:has(.save-bar) { scroll-padding-bottom: calc(80px + env(safe-area-inset-bot
   .admin-tabs { margin-left: 0; }
   .admin .header .ghost { padding: 0 6px; }
 }
+
+/* ══ 2026-11-13 리뉴얼: 사이트(Linear 풍)와 같은 말투로 — 비치는 머리말, 알약 탭, 큰 숫자, 강조색 막대, 떠 있는 저장 막대 ══
+   뒤에 두어 위 규칙을 덮는다. 움직임은 styles.css의 '움직임 줄이기' 규칙에서 꺼진다 */
+.admin .header { height: calc(60px + env(safe-area-inset-top)); gap: 14px; padding-left: max(20px, env(safe-area-inset-left), calc((100% - 1280px) / 2 + 20px)); padding-right: max(20px, env(safe-area-inset-right), calc((100% - 1280px) / 2 + 20px)); background: color-mix(in srgb, var(--paper) 78%, transparent); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); }
+.admin .brand { gap: 10px; font-size: 16px; font-weight: 400; letter-spacing: -.02em; white-space: nowrap; }
+.admin .brand b { font-weight: 800; }
+.brand-tag { padding: 2px 8px; border: 1px solid var(--rule-2); border-radius: 999px; font-size: 11.5px; font-weight: 600; color: var(--ink-2); letter-spacing: 0; }
+.admin-tabs { gap: 2px; margin-left: 4px; padding: 3px; border: 1px solid var(--rule); border-radius: 10px; background: var(--paper-2); }
+.admin-tabs .tab { height: 32px; padding: 0 12px; margin: 0; border: 0; border-radius: 7px; font-size: 13.5px; font-weight: 500; color: var(--ink-3); }
+.admin-tabs .tab:hover { color: var(--ink); }
+.admin-tabs .tab[aria-selected='true'] { background: var(--paper-3); color: var(--ink); box-shadow: inset 0 1px 0 var(--edge), 0 0 0 1px var(--rule-2); }
+.admin-main { padding-top: 22px; }
+.admin-panel { gap: 16px; }
+.admin-panel > * { animation: rise-in .32s cubic-bezier(.2, .8, .2, 1) backwards; }
+.admin-panel > :nth-child(2) { animation-delay: .04s; } .admin-panel > :nth-child(3) { animation-delay: .08s; } .admin-panel > :nth-child(n + 4) { animation-delay: .12s; }
+.dash-bar .chip { min-height: 32px; border-color: var(--rule-2); font-weight: 500; font-size: 13px; }
+.dash-bar .chip[aria-checked='true'] { background: var(--paper-3); border-color: var(--field); color: var(--ink); }
+
+/* 숫자 요약: 이름은 작게, 숫자는 크게(고정폭), 상태는 점 + 숫자색 + 위쪽 옅은 빛 */
+.kpis { gap: 12px; }
+.kpi { position: relative; padding: 14px 16px 16px; gap: 6px; overflow: hidden; }
+.kpi span { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-3); }
+.kpi span i { width: 6px; height: 6px; border-radius: 50%; }
+.kpi b { font-family: var(--mono); font-size: clamp(20px, 2.6vw, 28px); font-weight: 600; letter-spacing: -.03em; line-height: 1.1; color: var(--ink); }
+.kpi.good { --tone: var(--good); } .kpi.warn { --tone: var(--warn); } .kpi.bad { --tone: var(--bad); }
+.kpi:is(.good, .warn, .bad) span i { background: var(--tone); }
+.kpi:is(.good, .warn, .bad) b { color: var(--tone); }
+.kpi:is(.good, .warn, .bad)::after { content: ''; position: absolute; inset: 0 0 auto; height: 44px; pointer-events: none; opacity: .1; background: linear-gradient(var(--tone), transparent); }
+
+/* 카드 */
+.card { padding: 18px 20px 20px; gap: 14px; transition: border-color .2s; }
+.card:hover { border-color: var(--rule-2); }
+.card-head h3 { font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
+.grid2 { gap: 16px; }
+
+/* 막대: 가늘게, 강조색 한 가지, 들어올 때 자란다 */
+.bars { gap: 10px; }
+.bars li { grid-template-columns: minmax(80px, 34%) minmax(0, 1fr) auto; font-size: 13px; }
+.bar-label { color: var(--ink-2); }
+.bar-track { height: 6px; border-radius: 3px; background: var(--paper-3); }
+.bar-track i { border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-text)); animation: bar-grow .6s cubic-bezier(.2, .8, .2, 1) backwards; }
+@keyframes bar-grow { from { width: 0; } }
+.bar-value { font-family: var(--mono); font-size: 12.5px; color: var(--ink); }
+.stack { height: 8px; border-radius: 4px; gap: 3px; }
+.stack i { border-radius: 2px; }
+
+/* 선 차트 */
+.chart .grid { stroke-dasharray: 2 4; }
+.chart .area { opacity: .1; stroke: none; }
+.axis-y, .axis-x { font-family: var(--mono); font-size: 10.5px; }
+.tip { border-radius: 8px; border-color: var(--rule-2); background: var(--paper-3); }
+
+/* 상태 표시: 알약 */
+.status { padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; background: color-mix(in srgb, currentColor 12%, transparent); }
+.status > span[aria-hidden] { font-size: 8px; }
+.card-head .status, .all-clear .status { background: none; padding: 0; }
+.vitals { gap: 0; }
+.vitals li { padding: 9px 0; border-top: 1px solid var(--rule); }
+.vitals li:first-child { border-top: 0; padding-top: 0; }
+.vital-v { font-family: var(--mono); font-weight: 600; font-size: 13.5px; }
+
+/* 오류 로그 */
+.logs li + li { border-top: 1px solid var(--rule); }
+.logs li > button { border-radius: 8px; }
+.log-count { font-family: var(--mono); background: var(--accent-soft); color: var(--accent-text); }
+.logs pre { border: 1px solid var(--rule); background: var(--paper); font-family: var(--mono); }
+
+/* 알림: 규칙 줄 정렬, 받을 곳은 꺼진 칸을 낮게, 저장 막대는 떠 있는 판 */
+.rules li { padding: 14px 0; border-top-color: var(--rule); }
+.rules li:first-child { border-top: 0; }
+.rule-text b { font-size: 14px; }
+.rule-th .text-input { font-family: var(--mono); text-align: right; }
+.channels { align-items: start; }
+.channel { border-radius: 12px; border-color: var(--rule); background: var(--paper); }
+.channel.on { border-color: var(--accent); background: var(--accent-soft); }
+.quiet { border-top-color: var(--rule); }
+.save-bar { bottom: 12px; justify-content: flex-end; margin-top: 4px; padding: 10px 12px; border: 1px solid var(--rule-2); border-radius: 14px; background: color-mix(in srgb, var(--paper-2) 86%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: var(--shadow-lg); }
+.save-bar .primary.save, .save-bar .btn, .save-bar .secondary { height: 40px; }
+
+/* 로그인: 뒤에 은은한 빛, 가운데 판 */
+.login { position: relative; }
+.login::before { content: ''; position: absolute; z-index: -1; inset: 10% 20% auto; height: 360px; pointer-events: none; filter: blur(50px); background: radial-gradient(50% 60% at 50% 40%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 70%); }
+.login-box { padding: 28px; gap: 12px; border-radius: 16px; animation: rise-in .4s cubic-bezier(.2, .8, .2, 1) backwards; }
+.login-box .mark { margin-bottom: 4px; }
+.login-box h1 { margin: 0; font-size: 22px; letter-spacing: -.02em; }
+.login-sub { margin: -6px 0 8px; }
+
+@media (max-width: 640px) {
+  .admin .header { gap: 8px; padding-left: 12px; padding-right: 12px; }
+  .admin .brand { display: flex; }
+  .brand-name, .brand-tag { display: none; }
+  .admin-tabs .tab { padding: 0 9px; font-size: 13px; }
+  .admin-main { padding-top: 14px; }
+  .save-bar { justify-content: stretch; }
+  .save-bar > * { flex: 1; }
+}
+/* 찍어 보고 고친 것: 한글 '정상'이 고정폭 글꼴에서 가늘게 보임, 규칙 줄의 상태 알약이 칸 폭만큼 늘어남, 폰에서 요약 5칸이 3+2로 남던 빈칸 */
+.kpi b { font-family: var(--font); font-weight: 700; font-variant-numeric: tabular-nums; }
+.rules .status { justify-self: start; }
+@media (max-width: 900px) { .kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); } .kpi { grid-column: span 2; } .kpi:nth-child(n + 4) { grid-column: span 3; } }
+/* PC에서 한 화면(900px)에 들어오게: 리뉴얼로 늘린 여백 때문에 성능·서버 탭이 1045·1106px가 됐다(시험이 잡음) → 원래 밀도로 */
+.admin-main { padding-top: 16px; }
+.admin-panel, .grid2 { gap: 12px; }
+.kpi { padding: 10px 16px 12px; gap: 4px; }
+.card { padding: 14px 18px 16px; gap: 10px; }
+.vitals li { padding: 6px 0; }
+.bars { gap: 8px; }

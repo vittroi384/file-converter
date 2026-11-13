@@ -31,7 +31,7 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET 필요}
       SECURE_COOKIE: ${SECURE_COOKIE:-true}
       PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8080}
-      TRUST_PROXY: ${TRUST_PROXY_HOPS:-2} # api 앞 프록시 수: 운영(Cloudflare + nginx)=2, CDN 없는 로컬=1. 실제보다 크면 X-Forwarded-For 위조로 요청 제한이 뚫린다
+      TRUST_PROXY: ${TRUST_PROXY_HOPS:-2} # api 앞 프록시 수: 운영(Cloudflare + 앞단 Caddy + nginx)=3, CDN 없는 로컬=1. 실제보다 크면 X-Forwarded-For 위조로 요청 제한이 뚫린다
       PROBE_URL: http://web:8080 # 합성 감시(1분마다 사이트를 직접 열어 봄)
       VM_URL: http://victoriametrics:8428
       VLOGS_URL: http://victorialogs:9428

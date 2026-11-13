@@ -1,6 +1,6 @@
 # 클라우드 목표 구성 (확장·이전 대비 설계 · 미적용)
 
-지금은 OCI VM 한 대에서 Docker Compose로 운영 중이다(DuckDNS 도메인, 앞단 리버스 프록시가 Let's Encrypt로 HTTPS, [배포](deploy.md)). 이 문서는 그 위에 OCI 관리형 서비스를 붙이는 확장과, AWS로 옮길 때를 대비한 목표 모습이다. 둘 다 아직 적용하지 않았다.
+지금은 OCI VM 한 대에서 Docker Compose로 운영 중이다(HTTPS는 Cloudflare, 같은 서버의 Caddy가 넘겨줌, [배포](deploy.md)). 이 문서는 그 위에 OCI 관리형 서비스를 붙이는 확장과, AWS로 옮길 때를 대비한 목표 모습이다. 둘 다 아직 적용하지 않았다.
 
 그림: [08 목표 구성 · OCI](diagrams/08-target-oci.png) · [09 목표 구성 · AWS](diagrams/09-target-aws.png) (원본 `tools/arch/08-target-oci.html`·`09-target-aws.html`, `node tools/arch/render.mjs 08 09`). 그림에서 점선 테두리 + '새로' 표시가 새로 붙일 것, 실선은 지금 있는 것이다.
 
@@ -10,8 +10,8 @@
 
 | 역할 | 지금(OCI VM 운영 중) | OCI 확장 | AWS |
 |---|---|---|---|
-| DNS | DuckDNS 하위 도메인 | 자기 도메인 + Cloudflare(또는 OCI DNS) | Route 53(또는 Cloudflare) |
-| TLS 인증서 | Let's Encrypt, 서버 앞단 리버스 프록시가 HTTPS를 끝내고 web(nginx):8080으로 | Cloudflare(SSL Full(strict) + Origin CA 인증서, 또는 OCI Certificates + Load Balancer) | ACM(CloudFront용은 us-east-1에서 발급) |
+| DNS | Cloudflare(다른 프로젝트 도메인의 하위 주소) | 자기 도메인 + Cloudflare(또는 OCI DNS) | Route 53(또는 Cloudflare) |
+| TLS 인증서 | Cloudflare가 HTTPS를 끝내고 같은 서버의 Caddy가 web(nginx):8081로(원본 구간은 HTTP) | Cloudflare(SSL Full(strict) + Origin CA 인증서, 또는 OCI Certificates + Load Balancer) | ACM(CloudFront용은 us-east-1에서 발급) |
 | CDN 캐시 | 없음(nginx가 바로 내줌) | Cloudflare 프록시 + 캐시 규칙 | CloudFront 경로별 캐시 동작 |
 | WAF·속도 제한 | 없음(api에 경로별 요청 제한만: 통계 120/분 · 로그인 5/분) | Cloudflare WAF 규칙(또는 OCI WAF + LB) | AWS WAF를 CloudFront에 붙임 |
 | 원본 받기 | 서버 공인 IP 80·443(리버스 프록시), 8080은 바깥에 열지 않음 | 공개 서브넷 VM 직접, 보안 목록/NSG에 Cloudflare IP만 | 퍼블릭 서브넷 EC2 직접, 보안 그룹에 CloudFront 원본용 관리형 접두사 목록만 |
@@ -55,7 +55,7 @@
 - [ ] GitHub Actions에 배포 작업 추가: CI 통과 → buildx로 linux/arm64 빌드 → OCIR push → Bastion 경유 SSH 또는 Run Command로 deploy.sh 실행
 - [ ] Cloudflare: 자기 도메인을 올리고 DNS를 VM IP로(주황 구름), 캐시 규칙(아래 '주의할 점'), WAF·속도 제한 규칙, 배포 끝에 캐시 비우기
 - [ ] 관리자 화면에서 알림 채널·외부 생존 신호 다시 확인, 외부 가용성 점검 추가
-- [ ] `BASE=https://localconvert.duckdns.org node e2e/stack.mjs`로 전체 경로 점검, IndexNow 알림
+- [ ] `BASE=https://convert.getqrmaker.com node e2e/stack.mjs`로 전체 경로 점검, IndexNow 알림
 
 ## 옮기는 순서 · AWS
 
