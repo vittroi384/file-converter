@@ -11,6 +11,7 @@ export const dict: Dict = {
     search: { title: 'So findet die smarte Komprimierung die Größe', sub: 'Die kleinste Datei, die das Qualitätsziel erreicht – im Schnitt etwa 2–4 Versuche.', quality: 'Qualität', target: 'Ziel', size: 'Dateigröße', steps: ['Erste Schätzung aus Statistiken ähnlicher Fotos', 'Sprung über das Ziel anhand der Steigung', 'Eingrenzen per Interpolation', 'Die kleinste bestandene Datei'], over: 'über dem Ziel, noch groß', under: 'darunter', pass: 'bestanden — gewählt' },
     parallel: { title: 'Viele Dateien gleichzeitig', sub: 'Ein Worker pro CPU-Kern, und nur so viele, wie der Speicher erlaubt.', worker: 'Worker', zip: 'eine ZIP' },
     formats: { title: 'Von diesen Formaten zu jenen', sub: (n: number) => `Alle ${n} gezeigten Umwandlungen auf deinem Gerät.`, inputs: 'von', outputs: 'nach' },
+    meta: { title: 'Versteckte Fotodaten werden entfernt', sub: 'Standort, Gerätemodell und Aufnahmezeit werden beim Umwandeln entfernt. Nur das Farbprofil bleibt erhalten, damit die Farben gleich aussehen.', removed: 'Entfernt', kept: 'Erhalten' },
   },
   proof: { noUpload: 'Nichts wird hochgeladen', noUploadBody: 'Die Umwandlung läuft auf deinem Gerät. Der Browser blockiert jede Anfrage, die deine Datei an einen anderen Server senden würde.', noAds: 'Keine Werbung, kein Konto', noAdsBody: 'Keine Pop-ups, keine Warteräume, keine „Premium“-Sperre für große Dateien.', parallel: 'Stapel parallel', parallelBody: 'Hundert Fotos ablegen – sie werden auf mehreren CPU-Kernen gleichzeitig verarbeitet und als ein ZIP gespeichert.' },
   quick: {

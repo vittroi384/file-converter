@@ -11,6 +11,7 @@ export const dict: Dict = {
     search: { title: 'Como a compressão inteligente acha o tamanho', sub: 'O menor arquivo que ainda atinge a qualidade alvo, em cerca de 2–4 tentativas em média.', quality: 'qualidade', target: 'alvo', size: 'tamanho', steps: ['Primeiro palpite com estatísticas de fotos parecidas', 'Salto para o outro lado do alvo pela inclinação', 'Estreita por interpolação', 'O menor arquivo aprovado'], over: 'acima, ainda grande', under: 'abaixo', pass: 'aprovado — escolhido' },
     parallel: { title: 'Vários arquivos ao mesmo tempo', sub: 'Um processo por núcleo de CPU, e só quantos a memória permitir.', worker: 'processo', zip: 'um ZIP' },
     formats: { title: 'Destes formatos para aqueles', sub: (n: number) => `As ${n} conversões mostradas, todas no seu aparelho.`, inputs: 'de', outputs: 'para' },
+    meta: { title: 'Os dados ocultos das suas fotos são removidos', sub: 'Localização, modelo do aparelho e data e hora da foto são removidos na conversão. Só o perfil de cores é mantido, então as cores continuam iguais.', removed: 'Removido', kept: 'Mantido' },
   },
   proof: { noUpload: 'Nada é enviado', noUploadBody: 'A conversão acontece no seu aparelho. O próprio navegador bloqueia qualquer pedido que mandaria seu arquivo a outro servidor.', noAds: 'Sem anúncios nem conta', noAdsBody: 'Sem pop-ups, sem filas, sem “premium” para arquivos grandes.', parallel: 'Lotes em paralelo', parallelBody: 'Solte cem fotos — elas são processadas em vários núcleos ao mesmo tempo e salvas em um ZIP.' },
   quick: {

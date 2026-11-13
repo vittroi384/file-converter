@@ -13,6 +13,7 @@ export interface Dict {
     search: { title: string; sub: string; quality: string; target: string; size: string; steps: [string, string, string, string]; over: string; under: string; pass: string };
     parallel: { title: string; sub: string; worker: string; zip: string };
     formats: { title: string; sub: (n: number) => string; inputs: string; outputs: string };
+    meta: { title: string; sub: string; removed: string; kept: string };
   };
   proof: { noUpload: string; noUploadBody: string; noAds: string; noAdsBody: string; parallel: string; parallelBody: string };
   quick: Record<'convert' | 'compress' | 'pdf' | 'pdfCompress' | 'imageToPdf' | 'data', { title: string; desc: string }>;

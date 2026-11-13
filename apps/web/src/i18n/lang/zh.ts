@@ -11,6 +11,7 @@ export const dict: Dict = {
     search: { title: '智能压缩如何找到大小', sub: '满足画质目标的最小文件，平均约 2~4 次。', quality: '画质', target: '目标', size: '文件大小', steps: ['根据类似照片的统计先猜一个', '沿斜率跳到目标另一侧', '插值缩小范围', '达标中最小的文件'], over: '超过目标，仍偏大', under: '不足', pass: '达标 — 选用' },
     parallel: { title: '同时处理多个文件', sub: '每个 CPU 核心一个工作进程，只在内存允许的范围内并行。', worker: '工作进程', zip: '打包成一个 ZIP' },
     formats: { title: '从这些格式到那些格式', sub: (n: number) => `图中 ${n} 种转换都在你的设备上完成。`, inputs: '输入', outputs: '输出' },
+    meta: { title: '照片中隐藏的信息会被清除', sub: '转换时会去掉拍摄地点、设备型号和拍摄时间等信息。只保留颜色配置文件，所以颜色不会变。', removed: '已清除', kept: '已保留' },
   },
   proof: { noUpload: '不上传任何内容', noUploadBody: '转换在你的设备上完成。浏览器本身会拦截任何把文件发往其他服务器的请求。', noAds: '无广告、无账号', noAdsBody: '没有弹窗，没有排队，大文件也不需要付费。', parallel: '批量并行处理', parallelBody: '一次放入一百张照片，会在多个 CPU 核心上同时处理，并打包成一个 ZIP。' },
   quick: {

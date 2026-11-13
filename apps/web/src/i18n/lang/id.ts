@@ -11,6 +11,7 @@ export const dict: Dict = {
     search: { title: 'Cara kompres pintar menemukan ukuran', sub: 'File terkecil yang tetap memenuhi target kualitas, rata-rata sekitar 2–4 percobaan.', quality: 'kualitas', target: 'target', size: 'ukuran file', steps: ['Tebakan pertama dari statistik foto serupa', 'Lompat ke sisi lain target memakai kemiringan', 'Persempit dengan interpolasi', 'File terkecil yang lolos'], over: 'di atas target, masih besar', under: 'kurang', pass: 'lolos — dipilih' },
     parallel: { title: 'Banyak file sekaligus', sub: 'Satu pekerja per inti CPU, dan hanya sebanyak yang muat di memori.', worker: 'pekerja', zip: 'satu ZIP' },
     formats: { title: 'Dari format ini ke format itu', sub: (n: number) => `${n} konversi yang ditampilkan, semuanya di perangkatmu.`, inputs: 'dari', outputs: 'ke' },
+    meta: { title: 'Data tersembunyi di foto dihapus', sub: 'Lokasi, model perangkat, serta tanggal dan waktu pengambilan foto dihapus saat konversi. Hanya profil warna yang dipertahankan, jadi warnanya tetap sama.', removed: 'Dihapus', kept: 'Dipertahankan' },
   },
   proof: { noUpload: 'Tidak ada yang diunggah', noUploadBody: 'Konversi berjalan di perangkat Anda. Browser sendiri memblokir permintaan apa pun yang akan mengirim file ke server lain.', noAds: 'Tanpa iklan, tanpa akun', noAdsBody: 'Tanpa pop-up, tanpa antrean, tanpa batasan “premium” untuk file besar.', parallel: 'Batch paralel', parallelBody: 'Masukkan seratus foto — diproses di beberapa inti CPU sekaligus lalu disimpan dalam satu ZIP.' },
   quick: {

@@ -112,3 +112,8 @@
     @keyframes ls-sh { 0%, 12% { scale: var(--r0) 1; } 24% { scale: var(--r1) 1; } 42% { scale: var(--r2) 1; } 60% { scale: var(--r3) 1; } 78%, 100% { scale: var(--r4) 1; } }
   }
 }
+
+/* 랜딩 장면 그림이 PC에서 왼쪽 780px만 써 오른쪽이 비었다 → 폭을 다 쓰는 판 위에 올리고 그림은 가운데 780px */
+.ls-fig { max-width: none; margin: 0; padding: 28px max(20px, calc((100% - 780px) / 2)); background: var(--paper-2); border: 1px solid var(--rule); border-radius: 16px; box-shadow: inset 0 1px 0 var(--edge); }
+.ls-pic.gr, .ls-alpha, .ls-chip, .ls-code, .ls-sheet, .ls-px { background-color: var(--paper); }
+@media (max-width: 600px) { .ls-fig { padding: 16px 12px; } }

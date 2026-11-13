@@ -23,12 +23,14 @@ export function App({ data, t }: { data: PageData; t: Dict }) {
   useEffect(() => {
     try { if (localStorage.getItem('fc:theme') === 'light') { document.documentElement.dataset.theme = 'light'; setTheme('light'); } } catch { /* 저장소 막힘 */ }
   }, []);
-  const cycleTheme = () => setTheme(cur => {
-    const next: Theme = cur === 'dark' ? 'light' : 'dark';
-    if (next === 'dark') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = next;
+  const cycleTheme = () => {
+    const next: Theme = theme === 'dark' ? 'light' : 'dark';
+    const apply = () => { if (next === 'dark') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = next; };
+    const d = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+    if (d.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) d.startViewTransition(apply); else apply();
     try { localStorage.setItem('fc:theme', next); } catch { /* 무시 */ }
-    return next;
-  });
+    setTheme(next);
+  };
 
   const [toast, setToast] = useState<string | null>(null);
   const say = useCallback((m: string) => { setToast(m); setTimeout(() => setToast(x => (x === m ? null : x)), 2600); }, []);

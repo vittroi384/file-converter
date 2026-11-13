@@ -15,7 +15,7 @@ const swBytes = statSync(join(dist, 'sw.js')).size;
 
 const checks = [
   ['첫 화면 JS (gzip)', gz(one(/^index-.*\.js$/)), 90 * KB],
-  ['첫 화면 CSS (gzip)', gz(one(/^index-.*\.css$/)), 24 * KB],
+  ['첫 화면 CSS (gzip)', gz(one(/^index-.*\.css$/)), 28 * KB], // 24 → 26 → 28: 배치·움직임 규칙(devlog 40·42절)
   ['관리자 JS (gzip)', gz(one(/^Admin-.*\.js$/)), 15 * KB],
   ['서비스 워커', swBytes, 4 * KB],
 ];

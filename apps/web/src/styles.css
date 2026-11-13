@@ -130,8 +130,8 @@ body.dragging .drag-veil { display: grid; position: fixed; inset: 0; z-index: 60
 .file:hover { background: var(--paper-3); }
 .file.unfit { opacity: .45; }
 .file.dragging { opacity: .4; }
-.thumb { width: 52px; height: 52px; border-radius: 6px; background: var(--paper-3); display: grid; place-items: center; overflow: hidden; }
-.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.thumb { position: relative; width: 52px; height: 52px; border-radius: 6px; background: var(--paper-3); display: grid; place-items: center; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
 .file-main { min-width: 0; }
 .fname { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fmeta { font-size: 13px; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; margin-top: 2px; }
@@ -448,7 +448,8 @@ body.dragging .drag-veil { display: grid; position: fixed; inset: 0; z-index: 60
     .zip-box { animation-name: s-zip; animation-range: contain 86% contain 99%; }
     /* 끝난 파일 수: 레인을 다 지나는 동안 0 → 12 */
     /* 끝난 수·그린 선 수: 이름(s-done, s-edges)과 계단 지점은 Scenes.tsx가 실제 시점으로 만든다 */
-    .n-live { animation: linear both; animation-timeline: --scene; animation-range: contain 0% contain 100%; }
+    /* 줄임꼴(animation: linear both)로 쓰면 빌드 압축기가 이름이 없다고 'animation: none'으로 줄여 채움이 사라졌다 → 장면을 지나면 숫자가 0으로 돌아갔다 */
+    .n-live { animation-timing-function: linear; animation-fill-mode: both; animation-duration: auto; animation-timeline: --scene; animation-range: contain 0% contain 100%; }
     .n-live::after { counter-reset: n calc(var(--n)); content: counter(n); }
     @keyframes s-zip { from { scale: .9; color: var(--ink-3); border-color: var(--rule-2); } to { scale: 1; border-color: var(--accent); } }
 
@@ -491,3 +492,268 @@ body.dragging .drag-veil { display: grid; position: fixed; inset: 0; z-index: 60
 /* 명령 팔레트: 입력칸에 보이는 초점, 고른 줄의 단축키 글자 대비 */
 .palette input:focus-visible { box-shadow: inset 0 -2px 0 var(--accent); }
 .palette p.empty { margin: 0; }
+
+/* ══ 2026-11-13 전체 개선: 앱 창 배치 · 변환 과정 움직임 · 잔움직임 · 장면 판 ══
+   뒤에 두어 위 규칙을 덮는다. 움직임은 전부 '움직임 줄이기'에서 꺼진다(위 prefers-reduced-motion 규칙) */
+
+/* ── 머리말: 위에 붙어 있고 뒤가 비친다 ── */
+html { scroll-padding-top: 84px; }
+.masthead { position: sticky; top: 0; z-index: 20; max-width: none; padding-left: max(20px, env(safe-area-inset-left), calc((100% - 1180px) / 2 + 20px)); padding-right: max(20px, env(safe-area-inset-right), calc((100% - 1180px) / 2 + 20px)); background: color-mix(in srgb, var(--paper) 78%, transparent); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); }
+
+/* ── 첫 화면: 큰 제목 아래 앱 창 하나 ── */
+.hero { display: block; padding: 72px 0 28px; }
+.hero-text { max-width: 880px; margin-bottom: 40px; }
+.hero .display { font-size: clamp(40px, 6vw, 76px); }
+.stage { background: var(--paper-2); border: 1px solid var(--rule); border-radius: 16px; box-shadow: inset 0 1px 0 var(--edge); }
+.stage-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 12px; padding: 10px 16px; border-bottom: 1px solid var(--rule); font-size: 12.5px; color: var(--ink-3); }
+.stage-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid var(--rule-2); border-radius: 999px; font-size: 12px; color: var(--ink-2); }
+.stage-body { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; padding: 20px; }
+.stage .tool { margin: 0; display: flex; flex-direction: column; }
+.stage .drop { flex: 1; min-height: 260px; align-content: center; background: var(--paper); }
+.stage :is(.sheet, .history) { background: var(--paper); }
+.stage:has(.has-files) .stage-body { grid-template-columns: minmax(0, 1fr); }
+.stage:has(.has-files) .hero-demo { display: none; }
+@media (max-width: 920px) {
+  .hero { padding-top: 40px; }
+  .hero-text { margin-bottom: 28px; }
+  .stage-body { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 12px; }
+  .stage .side .run-bar { background: var(--paper); }
+}
+
+/* 자주 쓰는 변환: 밑줄 글 → 알약 */
+.quick { align-items: center; gap: 8px; margin: 8px 0 44px; }
+.quick a { padding: 4px 12px; border: 1px solid var(--rule); border-radius: 999px; text-decoration: none; transition: background .15s, border-color .15s; }
+.quick a:hover { background: var(--paper-2); border-color: var(--rule-2); }
+
+/* 약속 셋: 줄 나눔 → 카드 */
+.proof { border: 0; gap: 16px; }
+.proof-item, .proof-item + .proof-item { padding: 24px; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper-2); box-shadow: inset 0 1px 0 var(--edge); }
+.tool-group a { border-radius: 6px; transition: background .15s, padding .15s; }
+.tool-group a:hover { background: var(--paper-2); padding-inline: 8px; }
+
+/* ── 잔움직임 ── */
+:is(.btn, .secondary, .primary, .chip, .icon-btn, .tab, .add-more, .link-btn) { transition: background .15s, border-color .15s, color .15s, scale .12s; }
+:is(.btn, .secondary, .primary, .chip, .icon-btn, .add-more):active { scale: .97; }
+.lang[open] ul, .palette, .modal { animation: pop .18s cubic-bezier(.2, .8, .2, 1); }
+@keyframes pop { from { opacity: 0; scale: .97; translate: 0 -4px; } }
+/* 탭 밑줄이 고른 탭으로 미끄러진다(앵커 위치 지원 브라우저만. 그 밖에선 위의 탭별 밑줄) */
+@supports (anchor-name: --a) {
+  .tabs { position: relative; }
+  .tab[aria-selected='true'] { anchor-name: --tab; border-bottom-color: transparent; }
+  .tabs::after { content: ''; position: absolute; position-anchor: --tab; left: anchor(left); right: anchor(right); top: anchor(bottom); height: 2px; margin-top: -2px; background: var(--accent); transition: left .22s cubic-bezier(.2, .8, .2, 1), right .22s cubic-bezier(.2, .8, .2, 1); }
+}
+/* 접힌 글이 높이를 따라 열린다(지원 브라우저만) */
+@supports (interpolate-size: allow-keywords) {
+  :root { interpolate-size: allow-keywords; }
+  .faq details::details-content, .history::details-content { block-size: 0; overflow: clip; transition: block-size .25s ease, content-visibility .25s allow-discrete; }
+  .faq details[open]::details-content, .history[open]::details-content { block-size: auto; }
+}
+
+/* ── 변환 과정 ── */
+.drop { transition: border-color .15s, background .15s, scale .2s cubic-bezier(.2, .8, .2, 1); }
+.drop-mark { transition: translate .2s cubic-bezier(.2, .8, .2, 1), background .15s, color .15s; }
+.drop:hover .drop-mark { translate: 0 -3px; }
+body.dragging .drop { scale: 1.01; }
+body.dragging .drop-mark { background: var(--accent); border-color: var(--accent); color: #fff; animation: bob .7s ease-in-out infinite alternate; }
+@keyframes bob { to { translate: 0 -6px; } }
+.work, .result-actions { animation: rise-in .28s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes rise-in { from { opacity: 0; translate: 0 8px; } }
+/* 파일 줄: 차례로 나타나고, 도는 동안 미리보기가 숨 쉬고, 끝나면 한 번 번쩍 + 확인 표시 */
+.file { position: relative; animation: rise-in .32s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(min(var(--i, 0), 10) * 35ms); }
+.file.is-running .thumb { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .5; } }
+.progress > i::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgb(255 255 255 / 50%), transparent); animation: sheen 1.1s linear infinite; }
+@keyframes sheen { from { translate: -100% 0; } to { translate: 100% 0; } }
+.file.is-done::before { content: ''; position: absolute; inset: 0; border-radius: 8px; background: var(--accent-soft); opacity: 0; pointer-events: none; animation: flash .9s ease-out; }
+@keyframes flash { from { opacity: 1; } }
+.file.is-done .thumb::after { content: '✓'; position: absolute; right: -5px; bottom: -5px; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--paper-2); background: var(--ok); color: var(--paper); font-size: 10px; font-weight: 800; line-height: 1; animation: badge .4s cubic-bezier(.34, 1.56, .64, 1) both; }
+.delta { display: inline-block; animation: badge .4s cubic-bezier(.34, 1.56, .64, 1) both; }
+@keyframes badge { from { opacity: 0; scale: 0; } }
+
+/* ── 스크롤 장면: 그림을 판 위에 올리고, 고른 것만 은은하게 빛난다 ── */
+.search-fig, .lanes, .formats-map { background: var(--paper-2); border: 1px solid var(--rule); border-radius: 16px; box-shadow: inset 0 1px 0 var(--edge); }
+.search-fig { padding: 20px 20px 16px; }
+.formats-map { padding: 16px; box-sizing: border-box; }
+.lanes { padding: 24px 156px 24px 24px; }
+.zip-box { right: 24px; background: var(--paper); }
+.lane-track { background: var(--paper); border: 1px solid var(--rule); }
+.lane-bar { box-shadow: 0 0 12px var(--accent); }
+.search-fig .probe.pick circle { filter: drop-shadow(0 0 8px var(--accent)); }
+@media (max-width: 720px) {
+  .search-fig { padding: 12px; }
+  .lanes { padding: 16px 16px 92px; }
+  .zip-box { right: 50%; bottom: 16px; }
+}
+/* 장면마다 진행 줄: 스크롤이 장면을 움직인다는 걸 보여 준다 */
+@property --p { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    :is(.search-scene, .parallel-scene, .formats-scene) .scene-stage::before { content: ''; display: block; height: 2px; margin-bottom: 18px; border-radius: 2px; background: linear-gradient(var(--accent) 0 0) left / var(--p) 100% no-repeat, var(--rule); animation: s-rail linear both; animation-timeline: --scene; animation-range: contain 0% contain 100%; }
+    @keyframes s-rail { to { --p: 100%; } }
+  }
+}
+/* 가장 좁은 화면: 앱 창 안쪽 여백을 줄여 파일 이름 칸을 지킨다(320px에서 58px까지 줄었다 — 배치 시험이 잡음) */
+@media (max-width: 420px) { .stage { border-radius: 12px; } .stage-body { padding: 4px; } .stage-bar { padding: 8px 12px; } }
+
+/* ══ 2026-11-13 움직임 보강: 첫 화면 등장 · 앱 창 빛 · 예시 자동 재생 · 장면 보강 ══
+   전부 '움직임 줄이기'에서 꺼진다. 꺼졌을 때 남는 것은 뒤의 빛(정지)과 용량 막대(결과 길이)뿐 */
+
+/* ── 첫 화면: 차례로 떠오른다. 끝난 뒤엔 효과가 남지 않게 backwards(남으면 앱 창이 고정 요소의 기준 상자가 된다) ── */
+:is(.hero-text, .landing-head) > *, .stage { animation: hero-in .7s cubic-bezier(.2, .8, .2, 1) backwards; }
+:is(.hero-text, .landing-head) > :nth-child(2) { animation-delay: .08s; }
+:is(.hero-text, .landing-head) > :nth-child(n + 3) { animation-delay: .16s; }
+.stage { animation-delay: .26s; }
+@keyframes hero-in { from { opacity: 0; translate: 0 18px; filter: blur(6px); } }
+.hero { position: relative; }
+.hero::before { content: ''; position: absolute; z-index: -1; inset: -40px 8% auto; height: 520px; pointer-events: none; filter: blur(40px); background: radial-gradient(50% 60% at 28% 30%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 70%), radial-gradient(40% 50% at 80% 20%, color-mix(in srgb, var(--ok) 9%, transparent), transparent 70%); animation: drift 14s ease-in-out infinite alternate; }
+@keyframes drift { to { translate: 3% 24px; opacity: .65; } }
+
+/* ── 앱 창: 아래로 번지는 빛, 테두리를 도는 빛, 마우스를 따라오는 빛 ── */
+@property --beam { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.stage { position: relative; box-shadow: inset 0 1px 0 var(--edge), 0 50px 120px -50px color-mix(in srgb, var(--accent) 50%, transparent); }
+.stage::before { content: ''; position: absolute; inset: -1px; padding: 1px; border-radius: inherit; pointer-events: none; opacity: 0; background: conic-gradient(from var(--beam), transparent 0 76%, var(--accent-text) 92%, transparent); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: beam 7s linear infinite, beam-on .8s .9s forwards; }
+@keyframes beam { to { --beam: 360deg; } }
+@keyframes beam-on { to { opacity: 1; } }
+.stage::after, .proof-item::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .3s; background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 0), color-mix(in srgb, var(--accent-text) 9%, transparent), transparent 70%); }
+:is(.stage, .proof-item):hover::after { opacity: 1; }
+.proof-item, .proof-item + .proof-item { position: relative; transition: border-color .2s, transform .2s; }
+.proof-item:hover { border-color: var(--rule-2); transform: translateY(-3px); }
+.arrow { transition: translate .15s; }
+.tool-group a:hover .arrow { translate: 3px 0; }
+.drop-mark { position: relative; }
+.drop-mark::after { content: ''; position: absolute; inset: -1px; border-radius: 50%; border: 1px solid var(--accent-text); opacity: 0; animation: ping 2.6s ease-out infinite; }
+@keyframes ping { 0% { opacity: .7; scale: 1; } 70%, 100% { opacity: 0; scale: 1.9; } }
+
+/* ── 변환 예: 손잡이가 한 번 쓸고 가운데로 돌아오고, 용량 막대가 원본 길이에서 결과 길이로 줄어든다 ── */
+@property --pos { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+.hero-demo .compare { animation: sweep 1.9s 1s cubic-bezier(.65, 0, .35, 1) backwards; }
+@keyframes sweep { 0% { --pos: 100%; } 55% { --pos: 12%; } }
+.meter { display: block; height: 4px; margin-bottom: 4px; border-radius: 2px; background: var(--rule-2); overflow: hidden; }
+.meter > i { display: block; height: 100%; border-radius: 2px; background: var(--ok); transform-origin: left; scale: var(--r) 1; animation: meter 1.3s 1.5s cubic-bezier(.2, .8, .2, 1) backwards; }
+@keyframes meter { from { scale: 1 1; background: var(--ink-3); } }
+.hero-demo .delta { animation-delay: 2.5s; }
+
+/* ── 스크롤: 읽기 진행 줄, 장면 판 등장, 카드 시차, 파일 꼬리빛, 서버로 못 나가는 점 ── */
+.lane-chip::before { content: ''; position: absolute; right: 100%; top: 50%; width: 52px; height: 2px; margin-top: -1px; background: linear-gradient(90deg, transparent, var(--accent-text)); }
+.j-wire::before { content: ''; position: absolute; left: 6px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--accent-text); box-shadow: 0 0 10px var(--accent); opacity: 0; }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .masthead::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--accent); transform-origin: left; animation: s-bar linear both; animation-timeline: scroll(root); }
+    :is(.scene-head, .search-fig, .lanes, .formats-map, .index .section-title) { animation: lc-reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+    .proof-item:nth-child(2) { animation-range: entry 14% entry 84%; }
+    .proof-item:nth-child(3) { animation-range: entry 28% entry 98%; }
+    .j-wire::before { animation: j-pkt ease-in-out both; animation-timeline: --journey; animation-range: contain 0% contain 100%; }
+    @keyframes j-pkt { 0%, 34% { opacity: 0; left: 6px; } 38% { opacity: 1; left: 6px; } 47% { opacity: 1; left: calc(50% - 20px); } 56%, 100% { opacity: 0; left: 6px; } }
+  }
+}
+/* ── 형식 지도: 화면 폭을 다 쓴다. 왼쪽 지도, 오른쪽에 조합 수와 입력별 출력 줄(지도와 같은 구간에서 밝아진다) ── */
+.formats-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 32px; align-items: center; }
+.formats-map { max-width: none; }
+.formats-side .formats-count { margin: 0 0 14px; }
+.formats-side .formats-count b { font-size: 52px; line-height: 1; letter-spacing: -.03em; }
+.formats-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.formats-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 7px 10px; border: 1px solid transparent; border-radius: 8px; }
+@media (max-width: 720px) { .formats-grid { grid-template-columns: minmax(0, 1fr); gap: 8px; } .formats-list { display: none; } .formats-side .formats-count b { font-size: 22px; } }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .formats-list li { animation: f-row ease-in-out both; animation-timeline: --scene; animation-range: contain var(--a) contain var(--b); }
+    @keyframes f-row { 0% { filter: grayscale(1) brightness(.55); } 15%, 80% { filter: none; background: var(--accent-soft); border-color: var(--accent); translate: 6px 0; } 100% { filter: none; } }
+  }
+}
+/* ── 탐색 장면: 오른쪽 단계가 맨글자라 비어 보였다 → 단계마다 판 + 원본 대비 크기 막대 ── */
+.search-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+.search-steps { gap: 10px; }
+.search-steps li { padding: 12px 14px; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper-2); box-shadow: inset 0 1px 0 var(--edge); }
+.search-steps li.last { border-color: var(--accent); background: var(--accent-soft); }
+.step-bar { display: block; height: 3px; margin-top: 8px; border-radius: 2px; background: linear-gradient(var(--ink-3) 0 0) left / calc(var(--w) * 100%) 100% no-repeat, var(--rule-2); }
+.search-steps li.last .step-bar { background: linear-gradient(var(--accent-text) 0 0) left / calc(var(--w) * 100%) 100% no-repeat, var(--rule-2); }
+
+/* ── 숨은 정보 장면(MetaScene). 기본 = 다 지워진 정지 그림 ── */
+.meta-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: center; }
+.meta-photo { display: grid; gap: 8px; font-size: 12.5px; }
+.meta-frame { position: relative; aspect-ratio: 16 / 10; overflow: hidden; border: 1px solid var(--rule); border-radius: 16px; background: var(--paper-3); }
+.meta-pin { position: absolute; left: 8%; top: 12%; padding: 4px 10px; border-radius: 999px; background: rgb(0 0 0 / 62%); border: 1px solid rgb(255 255 255 / 22%); color: #fff; font-size: 12px; opacity: 0; }
+.meta-pin:nth-of-type(2) { left: 52%; top: 30%; } .meta-pin:nth-of-type(3) { left: 16%; top: 54%; } .meta-pin:nth-of-type(4) { left: 60%; top: 74%; }
+.meta-scan { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--accent-text); box-shadow: 0 0 18px 4px var(--accent); opacity: 0; }
+.meta-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.meta-list li { display: grid; grid-template-columns: 118px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper-2); font-size: 13.5px; }
+.meta-k { color: var(--ink-3); font-size: 12px; }
+.meta-v { color: var(--ink-3); text-decoration: line-through; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta-b { padding: 2px 9px; border-radius: 999px; background: var(--paper-3); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.meta-b::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: var(--danger); vertical-align: 1px; }
+.meta-list .keep { border-color: var(--accent); background: var(--accent-soft); }
+.meta-list .keep .meta-v { color: var(--ink); text-decoration: none; }
+.meta-list .keep .meta-b::before { background: var(--ok); }
+@media (max-width: 720px) { .meta-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; } .meta-frame { aspect-ratio: 16 / 7; } .meta-list { gap: 6px; } .meta-list li { grid-template-columns: 96px minmax(0, 1fr) auto; padding: 8px 10px; } }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .meta-scene { height: 300vh; view-timeline: --scene block; --sh: 470px; }
+    .meta-scene .scene-stage::before { content: ''; display: block; height: 2px; margin-bottom: 18px; border-radius: 2px; background: linear-gradient(var(--accent) 0 0) left / var(--p) 100% no-repeat, var(--rule); animation: s-rail linear both; animation-timeline: --scene; animation-range: contain 0% contain 100%; }
+    .meta-scene :is(.meta-pin, .meta-scan, .meta-list li:not(.keep), .meta-list li:not(.keep) > *, .keep) { animation-timeline: --scene; animation-fill-mode: both; animation-timing-function: ease-in-out; animation-duration: auto; animation-range: contain var(--a, 0%) contain var(--b, 100%); }
+    .meta-pin { animation-name: m-pin; }
+    @keyframes m-pin { 0%, 45% { opacity: 1; } 55% { opacity: 1; scale: 1.12; border-color: var(--danger); } 100% { opacity: 0; translate: 0 14px; filter: blur(4px); } }
+    .meta-scan { animation-name: m-scan; }
+    @keyframes m-scan { 0% { top: 0; opacity: 0; } 8%, 88% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+    .meta-list li:not(.keep) { animation-name: m-row; }
+    @keyframes m-row { 35%, 65% { border-color: var(--danger); background: var(--danger-soft); } }
+    .meta-list li:not(.keep) .meta-v { animation-name: m-val; }
+    @keyframes m-val { 0%, 45% { color: var(--ink); text-decoration-color: transparent; } }
+    .meta-list li:not(.keep) .meta-b { animation-name: m-badge; }
+    @keyframes m-badge { 0%, 55% { opacity: 0; scale: .6; } 75% { opacity: 1; scale: 1.1; } }
+    .keep { animation-name: m-keep; --a: 86%; --b: 98%; }
+    @keyframes m-keep { from { border-color: var(--rule); background: var(--paper-2); } }
+  }
+}/* 폰: 무대가 화면 높이를 넘어 마지막 줄(ICC)이 잘렸다 → 사진을 낮추고 파일 이름을 빼고 무대를 위로 */
+@media (max-width: 720px) { .meta-scene { --sh: 680px; } .meta-frame { aspect-ratio: 16 / 6; } .meta-photo > .num { display: none; } }/* 사진 위에 강조색을 살짝 섞고 아래를 어둡게(꼬리표 글자가 읽히게) */
+.meta-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.meta-frame::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(transparent 45%, rgb(1 1 2 / 55%)), linear-gradient(135deg, color-mix(in srgb, var(--accent) 28%, transparent), transparent 60%); }
+/* ══ 화면 크기 점검(13종 × 10개 언어)에서 나온 것 ══ */
+/* 탐색 장면: 위의 1.2fr 규칙이 폰용 한 칸 규칙을 덮어 폰에서 그래프와 단계가 반씩 찌그러졌다 */
+@media (max-width: 720px) { .search-grid { grid-template-columns: minmax(0, 1fr); } .search-steps { gap: 6px; } .search-steps li { padding: 8px 12px; } }
+/* 낮은 PC 화면(720~768px)에서 무대 아래가 잘렸다 → 그림 높이를 화면 높이에 묶고 무대를 위로 */
+.search-fig svg { max-height: 44svh; }
+.meta-frame { max-height: 40svh; }
+@media (min-width: 901px) { .search-scene { --sh: 680px; } .meta-scene { --sh: 620px; } }
+/* 숨은 정보: 값이 말줄임으로 잘렸다(태블릿·폰) → 이름 칸을 글자 폭만큼만, 900px 아래는 한 칸 */
+.meta-list li { grid-template-columns: max-content minmax(0, 1fr) auto; }
+@media (max-width: 900px) {
+  .meta-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .meta-frame { aspect-ratio: 16 / 6; }
+  .meta-photo > .num { display: none; }
+  .meta-scene { --sh: 780px; }
+}
+@media (max-width: 720px) {
+  .meta-scene { --sh: 680px; }
+  .meta-list { gap: 5px; }
+  .meta-list li { grid-template-columns: max-content minmax(0, 1fr) auto; padding: 6px 10px; gap: 8px; }
+  .meta-k { font-size: 11px; } .meta-v { font-size: 12px; }
+  .formats-side .formats-count { margin-bottom: 6px; }
+  .parallel-scene { --sh: 520px; }
+  .journey { --sh: 500px; }
+  .j-device { min-height: 190px; } .j-server { min-height: 150px; }
+}
+@media (max-width: 340px) { .meta-b { font-size: 0; padding: 5px; } .meta-b::before { margin: 0; vertical-align: 0; } }
+/* 폰: 단계 설명을 한 자리에 겹쳐 두고 차례인 것만 보인다(다 늘어놓으면 무대가 화면 높이를 넘어 아래가 잘렸다) */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (max-width: 720px) {
+    .search-steps, .journey-steps { display: grid; }
+    .search-steps li, .journey-steps li { grid-area: 1 / 1; }
+    .search-steps li, .journey-steps li:nth-child(2) { animation-name: one; }
+    .search-steps li:first-child, .journey-steps li:nth-child(1) { animation-name: one-first; }
+    .search-steps li.last, .journey-steps li:nth-child(3) { animation-name: one-last; }
+    @keyframes one { 0%, 8%, 84%, 100% { opacity: 0; } 20%, 72% { opacity: 1; } }
+    @keyframes one-first { 0%, 70% { opacity: 1; } 82%, 100% { opacity: 0; } }
+    @keyframes one-last { 0%, 8% { opacity: 0; } 20%, 100% { opacity: 1; } }
+  }
+}/* 낮은 폰(높이 700px 아래): 장면 설명 한 줄을 접고 기기 그림을 낮춰 무대를 화면 안에 넣는다(움직일 때만. 정지 그림에선 다 보인다) */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (max-width: 720px) and (max-height: 700px) {
+    .scene-head .lede { display: none; }
+    .scene-head { margin-bottom: 10px; }
+    .section-title { margin-bottom: 12px; }
+    .j-device { min-height: 150px; padding: 14px 8px; } .j-server { min-height: 120px; }
+  }
+}/* 숨은 정보: 줄마다 따로 잡힌 칸 폭 때문에 값이 줄마다 다른 자리에서 시작했다 → 이름 칸 고정 폭. 사진은 높이를 묶어도 폭은 그대로 */
+.meta-list li { grid-template-columns: 104px minmax(0, 1fr) auto; }
+@media (max-width: 720px) { .meta-list li { grid-template-columns: 88px minmax(0, 1fr) auto; } }
+.meta-frame { width: 100%; }

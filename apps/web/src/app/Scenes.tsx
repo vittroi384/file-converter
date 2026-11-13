@@ -73,7 +73,8 @@ export function SearchScene({ demo }: { demo: DemoData }) {
             {probes.map((p, i) => (
               <li key={i} style={css({ animationRange: `contain ${at(i)}% contain ${i === n - 1 ? 100 : at(i + 1)}%` })} className={i === n - 1 ? 'last' : ''}>
                 <span className="step-n num">{i + 1}</span>
-                <span><b>{strategy(i)}</b><small className="num">q{p.q} → SSIM {p.ssim.toFixed(3)} · {bytes(p.bytes)} · {i === n - 1 ? s.pass : p.ssim >= target ? s.over : s.under}</small></span>
+                <span><b>{strategy(i)}</b><small className="num">q{p.q} → SSIM {p.ssim.toFixed(3)} · {bytes(p.bytes)} · {i === n - 1 ? s.pass : p.ssim >= target ? s.over : s.under}</small>
+                  <i className="step-bar" style={css({ '--w': (p.bytes / demo.before.bytes).toFixed(3) })} /></span>
               </li>
             ))}
           </ol>
@@ -123,6 +124,46 @@ export function ParallelScene() {
   );
 }
 
+// ── 숨은 정보 장면: 사진에 붙은 기록이 하나씩 지워지고 색 프로필만 남는다 ──
+// 지우는 종류는 ops/strip.ts가 실제로 지우는 것(EXIF·XMP)과 남기는 것(ICC). 오른쪽 값은 보기용 예시(실제 파일 값 아님)
+const META = [['GPS', '37.5665, 126.9780'], ['EXIF Model', 'Phone 15 Pro'], ['EXIF DateTime', '2026:11:04 15:02'], ['XMP', 'Creator · Software']] as const;
+const metaAt = (i: number) => 14 + i * 18;
+export function MetaScene() {
+  const { t } = useI18n();
+  const s = t.scenes.meta;
+  return (
+    <section className="scene meta-scene" aria-labelledby="meta-title">
+      <style>{stepFrames('s-meta', META.map((_, i) => metaAt(i) + 13))}</style>
+      <div className="scene-stage">
+        <header className="scene-head">
+          <h2 id="meta-title" className="section-title">{s.title}</h2>
+          <p className="lede">{s.sub}</p>
+        </header>
+        <div className="meta-grid" aria-hidden="true">
+          <div className="meta-photo">
+            <div className="meta-frame">
+              {/* 사진: Johannes Plenio, "Beautiful mountain reflection" — CC0(위키미디어 공용), 960px로 줄인 것 */}
+              <img src="/demo/meta-photo.jpg" alt="" width={960} height={540} loading="lazy" decoding="async" draggable={false} />
+              {META.map(([k], i) => <span key={k} className="meta-pin num" style={css({ '--a': `${metaAt(i)}%`, '--b': `${metaAt(i) + 20}%` })}>{k}</span>)}
+              <i className="meta-scan" />
+            </div>
+            <span className="num dim">IMG_2041.jpg</span>
+          </div>
+          <div className="formats-side">
+            <p className="formats-count"><b className="num"><span className="stat-static">{META.length}</span><span className="n-live" style={css({ animationName: 's-meta' })} /></b> / {META.length} {s.removed}</p>
+            <ul className="meta-list">
+              {META.map(([k, v], i) => (
+                <li key={k} style={css({ '--a': `${metaAt(i)}%`, '--b': `${metaAt(i) + 20}%` })}><span className="num meta-k">{k}</span><span className="num meta-v">{v}</span><span className="meta-b">{s.removed}</span></li>
+              ))}
+              <li className="keep"><span className="num meta-k">ICC</span><span className="num meta-v">Display P3</span><span className="meta-b">{s.kept}</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── 형식 지도: 실제로 되는 조합만 선으로 ──
 const INS = ['heic', 'psd', 'svg', 'png', 'jpg', 'pdf', 'xlsx', 'csv'] as const;
 const OUTS = ['jpg', 'png', 'webp', 'avif', 'pdf', 'csv', 'json', 'xlsx'] as const;
@@ -151,6 +192,7 @@ export function FormatsScene() {
           <h2 id="formats-title" className="section-title">{s.title}</h2>
           <p className="lede">{s.sub(EDGES.length)}</p>
         </header>
+        <div className="formats-grid">
         <svg viewBox="0 -8 560 348" className="formats-map" role="img" aria-label={EDGES.map(([a, b]) => `${a}→${b}`).join(', ')}>
           <text x={60} y={4} className="axis" textAnchor="middle">{s.inputs}</text>
           <text x={500} y={4} className="axis" textAnchor="middle">{s.outputs}</text>
@@ -161,7 +203,19 @@ export function FormatsScene() {
           {INS.map((f, i) => <g key={f} className="node in" style={range(seg(f), seg(f) + 11)}><rect x={16} y={y(i) - 13} width={88} height={26} rx={5} /><text x={60} y={y(i) + 5} textAnchor="middle">{f.toUpperCase()}</text></g>)}
           {OUTS.map((f, i) => <g key={f} className="node out" style={range(ARRIVE[i]! - 2, ARRIVE[i]! + 6)}><rect x={456} y={y(i) - 13} width={88} height={26} rx={5} /><text x={500} y={y(i) + 5} textAnchor="middle">{f.toUpperCase()}</text></g>)}
         </svg>
-        <p className="formats-count" aria-hidden="true"><b className="num"><span className="stat-static">{EDGES.length}</span><span className="n-live" style={css({ animationName: 's-edges' })} /></b> / {EDGES.length}</p>
+        {/* 옆 칸: 그려진 조합 수와, 입력 형식마다 갈 수 있는 출력. 지도와 같은 구간에서 그 줄이 밝아진다(그림 설명은 위 svg의 aria-label) */}
+        <div className="formats-side" aria-hidden="true">
+          <p className="formats-count"><b className="num"><span className="stat-static">{EDGES.length}</span><span className="n-live" style={css({ animationName: 's-edges' })} /></b> / {EDGES.length}</p>
+          <ol className="formats-list">
+            {INS.map(f => (
+              <li key={f} style={range(seg(f), seg(f) + 11)}>
+                <FileTag fmt={f} small /><span className="arrow">→</span>
+                {EDGES.filter(([a]) => a === f).map(([, o]) => <FileTag key={o} fmt={o} small />)}
+              </li>
+            ))}
+          </ol>
+        </div>
+        </div>
       </div>
     </section>
   );

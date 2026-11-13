@@ -24,6 +24,7 @@ export const ko: Dict = {
     search: { title: '스마트 압축은 이렇게 찾아요', sub: '목표 화질을 넘는 가장 작은 파일을, 평균 2~4번 남짓 만에.', quality: '품질', target: '목표', size: '파일 크기', steps: ['비슷한 사진 통계로 첫 추측', '기울기로 목표 반대편까지 점프', '사이를 좁혀 보간', '통과한 것 중 가장 작은 파일'], over: '목표 넘음, 아직 큼', under: '모자람', pass: '통과 — 선택' },
     parallel: { title: '여러 장을 동시에', sub: 'CPU 코어마다 작업자 하나. 메모리 예산 안에서만 동시에 돌려요.', worker: '작업자', zip: 'ZIP 하나로' },
     formats: { title: '이 형식에서 저 형식으로', sub: (n: number) => `보이는 ${n}가지 조합 모두 내 기기 안에서.`, inputs: '입력', outputs: '출력' },
+    meta: { title: '사진에 숨은 정보는 지워요', sub: '찍은 위치·기기·시각 같은 기록은 변환할 때 빠져요. 색 프로필만 남겨서 색은 그대로예요.', removed: '지움', kept: '유지' },
   },
   proof: {
     noUpload: '업로드 없음',

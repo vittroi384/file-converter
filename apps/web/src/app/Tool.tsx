@@ -1,5 +1,5 @@
 // 변환 도구(첫 화면·랜딩 공용). 서버 렌더에서도 그려지므로 렌더 중엔 window·localStorage를 만지지 않는다(효과·이벤트 안에서만).
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 // 최근 변환 목록: 화면에 붙은 뒤에만 불러온다(구운 HTML에 없음 → 첫 화면 JS·하이드레이션과 무관)
 const History = lazy(() => import('./History.tsx'));
 import { formatFromName } from '@fc/shared';
@@ -31,6 +31,24 @@ const vt = (fn: () => void) => {
   if (d.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) d.startViewTransition(fn);
   else fn();
 };
+// 숫자가 목표값까지 0.6초 동안 세어진다(움직임 줄이기면 바로). 끝값은 항상 정확한 목표값
+function useCount(target: number) {
+  const [v, setV] = useState(target);
+  const from = useRef(target);
+  useEffect(() => {
+    const a = from.current;
+    from.current = target;
+    if (a === target || matchMedia('(prefers-reduced-motion: reduce)').matches) { setV(target); return; }
+    const t0 = performance.now();
+    let raf = requestAnimationFrame(function step(now) {
+      const p = Math.min(1, (now - t0) / 600);
+      setV(Math.round(a + (target - a) * (1 - (1 - p) ** 3)));
+      if (p < 1) raf = requestAnimationFrame(step);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [target]);
+  return v;
+}
 const fieldLabel = (t: Dict, l: string | { raw: string }) => (typeof l === 'string' ? t.fields[l as keyof Dict['fields']] : l.raw);
 
 export interface ToolProps {
@@ -222,6 +240,7 @@ export function Tool({ initialAction, preset, accept, onCompare, registerCommand
   const hasResults = allResults.length > 0;
   const totalIn = items.filter(fits).reduce((s, i) => s + i.file.size, 0);
   const totalOut = allResults.reduce((s, r) => s + r.blob.size, 0);
+  const shownOut = useCount(hasResults ? totalOut : totalIn); // 결과가 나오면 원본 크기에서 결과 크기로 줄어든다
   // 화면 낭독기용 요약 한 줄(파일 목록 전체를 aria-live로 두면 진행률이 바뀔 때마다 목록을 통째로 읽었다)
   const doneN = items.filter(i => i.status === 'done').length, failN = items.filter(i => i.status === 'error').length;
   const statusText = combined && combined.status !== 'idle' && combined.status !== 'running'
@@ -253,7 +272,7 @@ export function Tool({ initialAction, preset, accept, onCompare, registerCommand
           <section className="sheet files-sheet" aria-label={t.ui.files}>
             <header className="sheet-head">
               <h2>{t.ui.files} <span className="num">{items.length}</span></h2>
-              {hasResults && <span className="num total">{bytes(totalIn)} → <b>{bytes(totalOut)}</b></span>}
+              {hasResults && <span className="num total">{bytes(totalIn)} → <b>{bytes(shownOut)}</b></span>}
               <button className="link-btn" onClick={clear}>{t.ui.clear}</button>
             </header>
             <div role="status" className="sr-only">{statusText}</div>
@@ -350,7 +369,7 @@ function FileRow({ it, t, idx, total, fits, reorder, onRemove, onMove, onCompare
   const name = it.file.name;
   const canCompare = !!it.thumb && first && /\.(jpe?g|png|webp|avif)$/i.test(first.name);
   return (
-    <li className={`file${dragging ? ' dragging' : ''}${fits ? '' : ' unfit'}`} {...dragProps}>
+    <li className={`file is-${it.status}${dragging ? ' dragging' : ''}${fits ? '' : ' unfit'}`} style={{ '--i': idx } as CSSProperties} {...dragProps}>
       <div className="thumb">{it.thumb ? <img src={it.thumb} alt="" loading="lazy" decoding="async" /> : <FileTag fmt={fmt} />}</div>
       <div className="file-main">
         <div className="fname" title={it.file.name}>{it.file.name}</div>

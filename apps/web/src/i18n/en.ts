@@ -24,6 +24,7 @@ export const en: Dict = {
     search: { title: 'How smart compress finds the size', sub: 'The smallest file that still meets the quality target — about 2–4 tries on average.', quality: 'quality', target: 'target', size: 'file size', steps: ['First guess from statistics of similar photos', 'Jump across the target using the slope', 'Narrow the gap by interpolating', 'Smallest file that passes'], over: 'above target, still big', under: 'below target', pass: 'passes — picked' },
     parallel: { title: 'Many files at once', sub: 'One worker per CPU core, and only as many at a time as memory allows.', worker: 'worker', zip: 'one ZIP' },
     formats: { title: 'From these to those', sub: (n: number) => `${n} conversions shown — all on your device.`, inputs: 'from', outputs: 'to' },
+    meta: { title: 'Hidden photo data is stripped out', sub: 'Where, when and on what device a photo was taken is removed when you convert it. Only the color profile is kept, so the colors look the same.', removed: 'Removed', kept: 'Kept' },
   },
   proof: {
     noUpload: 'Nothing is uploaded',
